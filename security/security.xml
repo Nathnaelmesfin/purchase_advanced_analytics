@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Module Category -->
+    <record id="module_category_purchase_advanced_analytics" model="ir.module.category">
+        <field name="name">Purchase Advanced Analytics</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- Security Groups -->
+    <record id="group_purchase_analytics_user" model="res.groups">
+        <field name="name">Purchase Analytics User</field>
+        <field name="category_id" ref="module_category_purchase_advanced_analytics"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_purchase_analytics_manager" model="res.groups">
+        <field name="name">Purchase Analytics Manager</field>
+        <field name="category_id" ref="module_category_purchase_advanced_analytics"/>
+        <field name="implied_ids" eval="[(4, ref('group_purchase_analytics_user'))]"/>
+    </record>
+
+    <!-- Multi-Company Record Rules -->
+
+    <!-- purchase.analytics.vendor.rule -->
+    <record id="purchase_analytics_vendor_rule_comp_rule" model="ir.rule">
+        <field name="name">Purchase Analytics Vendor Rule: Multi-Company</field>
+        <field name="model_id" ref="model_purchase_analytics_vendor_rule"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[
+            (4, ref('group_purchase_analytics_user')),
+            (4, ref('group_purchase_analytics_manager')),
+        ]"/>
+    </record>
+
+    <!-- purchase.analytics.target -->
+    <record id="purchase_analytics_target_comp_rule" model="ir.rule">
+        <field name="name">Purchase Analytics Target: Multi-Company</field>
+        <field name="model_id" ref="model_purchase_analytics_target"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[
+            (4, ref('group_purchase_analytics_user')),
+            (4, ref('group_purchase_analytics_manager')),
+        ]"/>
+    </record>
+
+    <!-- purchase.analytics.status.map -->
+    <record id="purchase_analytics_status_map_comp_rule" model="ir.rule">
+        <field name="name">Purchase Analytics Status Map: Multi-Company</field>
+        <field name="model_id" ref="model_purchase_analytics_status_map"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[
+            (4, ref('group_purchase_analytics_user')),
+            (4, ref('group_purchase_analytics_manager')),
+        ]"/>
+    </record>
+
+    <!-- purchase.analytics.alert.rule -->
+    <record id="purchase_analytics_alert_rule_comp_rule" model="ir.rule">
+        <field name="name">Purchase Analytics Alert Rule: Multi-Company</field>
+        <field name="model_id" ref="model_purchase_analytics_alert_rule"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[
+            (4, ref('group_purchase_analytics_user')),
+            (4, ref('group_purchase_analytics_manager')),
+        ]"/>
+    </record>
+
+</odoo>

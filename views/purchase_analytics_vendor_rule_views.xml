@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Vendor Scorecard Weighting Rule — Form View
+         ================================================================ -->
+    <record id="view_purchase_analytics_vendor_rule_form" model="ir.ui.view">
+        <field name="name">purchase.analytics.vendor.rule.form</field>
+        <field name="model">purchase.analytics.vendor.rule</field>
+        <field name="arch" type="xml">
+            <form string="Vendor Scorecard Weighting Rule">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Standard Scorecard Rule"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="General">
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <separator string="Scorecard Weights"/>
+                    <p class="text-muted">
+                        Define the relative weight (%) for each KPI used when calculating the
+                        vendor scorecard. The weights do not need to sum to 100 — the system
+                        normalises them automatically.
+                    </p>
+                    <group>
+                        <group string="Delivery &amp; Quality">
+                            <field name="on_time_delivery_weight"/>
+                            <field name="completion_rate_weight"/>
+                            <field name="quality_score_weight"/>
+                        </group>
+                        <group string="Price &amp; Responsiveness">
+                            <field name="price_stability_weight"/>
+                            <field name="response_speed_weight"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Vendor Scorecard Weighting Rule — List View
+         ================================================================ -->
+    <record id="view_purchase_analytics_vendor_rule_list" model="ir.ui.view">
+        <field name="name">purchase.analytics.vendor.rule.list</field>
+        <field name="model">purchase.analytics.vendor.rule</field>
+        <field name="arch" type="xml">
+            <list string="Vendor Scorecard Weighting Rules"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="on_time_delivery_weight" string="On-Time Del. (%)"/>
+                <field name="price_stability_weight" string="Price Stab. (%)"/>
+                <field name="completion_rate_weight" string="Completion (%)"/>
+                <field name="response_speed_weight" string="Response (%)"/>
+                <field name="quality_score_weight" string="Quality (%)"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Vendor Scorecard Weighting Rule — Search View
+         ================================================================ -->
+    <record id="view_purchase_analytics_vendor_rule_search" model="ir.ui.view">
+        <field name="name">purchase.analytics.vendor.rule.search</field>
+        <field name="model">purchase.analytics.vendor.rule</field>
+        <field name="arch" type="xml">
+            <search string="Search Vendor Rules">
+                <field name="name" string="Rule Name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_company" string="Company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Vendor Scorecard Weighting Rule — Window Action
+         ================================================================ -->
+    <record id="action_purchase_analytics_vendor_rule" model="ir.actions.act_window">
+        <field name="name">Vendor Scorecard Rules</field>
+        <field name="res_model">purchase.analytics.vendor.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_purchase_analytics_vendor_rule_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Vendor Scorecard Weighting Rule
+            </p>
+            <p>
+                Define how each KPI (on-time delivery, price stability, completion rate,
+                response speed, quality score) is weighted when computing vendor scorecards.
+            </p>
+        </field>
+    </record>
+
+</odoo>

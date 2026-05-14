@@ -1,0 +1,885 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Purchase Analytics PDF Report Template
+         Template ID: purchase_advanced_analytics.purchase_analytics_pdf_template
+         Model:       purchase.analytics.report.wizard  (transient)
+         Layout:      web.external_layout  (A4 landscape via paperformat) -->
+
+    <template id="purchase_analytics_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+
+                <!-- Gather data from the analytics service -->
+                <t t-set="filters"
+                   t-value="env['purchase.analytics.service']._normalize_filters(doc._build_filters())"/>
+                <t t-set="report_data"
+                   t-value="env['purchase.analytics.service'].get_report_data(filters)"/>
+                <t t-set="kpis"          t-value="report_data.get('kpis', {})"/>
+                <t t-set="status_rows"   t-value="report_data.get('status_breakdown', [])"/>
+                <t t-set="vendor_rows"   t-value="report_data.get('vendor_summary', [])"/>
+                <t t-set="product_rows"  t-value="report_data.get('product_summary', [])"/>
+                <t t-set="late_rows"     t-value="report_data.get('late_pos', [])"/>
+                <t t-set="approval_rows" t-value="report_data.get('waiting_approval', [])"/>
+                <t t-set="alert_rows"    t-value="report_data.get('price_alerts', [])"/>
+                <t t-set="meta"          t-value="report_data.get('meta', {})"/>
+
+                <!-- Human-readable report title map -->
+                <t t-set="title_map" t-value="{
+                    'purchase_management_summary':      'Purchase Management Summary',
+                    'purchase_request_analysis_report': 'Purchase Request Analysis',
+                    'rfq_analysis_report':              'RFQ Analysis Report',
+                    'purchase_order_analysis_report':   'Purchase Order Analysis Report',
+                    'vendor_performance_report':        'Vendor Performance Report',
+                    'product_purchase_report':          'Product Purchase Report',
+                    'category_purchase_report':         'Category Purchase Report',
+                    'buyer_performance_report':         'Buyer Performance Report',
+                    'receipt_matching_report':          'Receipt Matching Report',
+                    'bill_matching_report':             'Bill Matching Report',
+                    'approval_analysis_report':         'Approval Analysis Report',
+                    'late_purchase_report':             'Late Purchase Report',
+                    'unfinished_purchase_report':       'Unfinished Purchase Report',
+                    'price_trend_report':               'Price Trend Report',
+                    'vendor_price_comparison_report':   'Vendor Price Comparison Report',
+                    'requested_product_report':         'Requested Product Report',
+                    'unreceived_product_report':        'Unreceived Product Report',
+                    'unbilled_purchase_report':         'Unbilled Purchase Report',
+                    'cancelled_purchase_report':        'Cancelled Purchase Report',
+                    'purchase_target_report':           'Purchase Target Report',
+                    'purchase_alert_report':            'Purchase Alert Report',
+                }"/>
+                <t t-set="report_title"
+                   t-value="title_map.get(doc.report_type, doc.report_type or 'Purchase Analytics Report')"/>
+
+                <!-- PAGE rendered inside web.external_layout -->
+                <t t-call="web.external_layout">
+                    <div class="pal-report">
+
+                        <!-- Embedded CSS for wkhtmltopdf compatibility -->
+                        <style type="text/css">
+                            .pal-report { font-size: 10px; font-family: Arial, sans-serif; }
+                            .pal-kpi-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+                            .pal-kpi-card { border: 1px solid #ddd; border-radius: 4px; padding: 8px; min-width: 120px; flex: 1; }
+                            .pal-kpi-label { font-size: 9px; color: #666; }
+                            .pal-kpi-value { font-size: 14px; font-weight: bold; color: #333; }
+                            table.pal-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+                            table.pal-table th { background: #1a6496; color: white; padding: 4px 6px; font-size: 9px; }
+                            table.pal-table td { padding: 3px 6px; border-bottom: 1px solid #eee; font-size: 9px; }
+                            table.pal-table tr:nth-child(even) { background: #f9f9f9; }
+                            .pal-section-title { font-size: 12px; font-weight: bold; color: #1a6496; margin: 12px 0 4px; border-bottom: 2px solid #1a6496; }
+                            .page-break { page-break-before: always; }
+                            .pal-alert { background: #fff3cd; border: 1px solid #ffc107; padding: 4px 8px; border-radius: 3px; margin: 2px 0; }
+                            .pal-header-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+                            .pal-company-name { font-size: 16px; font-weight: bold; color: #1a6496; }
+                            .pal-report-title { font-size: 13px; font-weight: bold; color: #333; margin: 2px 0; }
+                            .pal-meta { font-size: 8px; color: #888; }
+                            .pal-filter-box { background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; padding: 6px 10px; margin: 8px 0; font-size: 9px; }
+                            .pal-filter-box span { margin-right: 16px; }
+                            .pal-filter-label { font-weight: bold; color: #555; }
+                            .pal-no-data { color: #999; font-style: italic; font-size: 9px; padding: 4px 0; }
+                        </style>
+
+                        <!-- Report Header -->
+                        <div class="pal-header-row">
+                            <div>
+                                <div class="pal-company-name">
+                                    <t t-esc="env.company.name"/>
+                                </div>
+                                <div class="pal-report-title">
+                                    <t t-esc="report_title"/>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="pal-meta">
+                                    Generated by: <t t-esc="meta.get('generated_by', env.user.name)"/>
+                                </div>
+                                <div class="pal-meta">
+                                    Generated at: <t t-esc="meta.get('generated_at', '')"/>
+                                </div>
+                                <div class="pal-meta">
+                                    Timezone: <t t-esc="meta.get('timezone', env.user.tz or 'UTC')"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Filter Summary -->
+                        <div class="pal-filter-box">
+                            <t t-if="filters.get('date_start') or filters.get('date_end')">
+                                <span>
+                                    <span class="pal-filter-label">Date Range: </span>
+                                    <t t-esc="filters.get('date_start', '')"/>
+                                    <t t-if="filters.get('date_start') and filters.get('date_end')"> - </t>
+                                    <t t-esc="filters.get('date_end', '')"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('order_date_from') or filters.get('order_date_to')">
+                                <span>
+                                    <span class="pal-filter-label">Order Date: </span>
+                                    <t t-esc="filters.get('order_date_from', '')"/>
+                                    <t t-if="filters.get('order_date_from') and filters.get('order_date_to')"> - </t>
+                                    <t t-esc="filters.get('order_date_to', '')"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('expected_date_from') or filters.get('expected_date_to')">
+                                <span>
+                                    <span class="pal-filter-label">Expected Date: </span>
+                                    <t t-esc="filters.get('expected_date_from', '')"/>
+                                    <t t-if="filters.get('expected_date_from') and filters.get('expected_date_to')"> - </t>
+                                    <t t-esc="filters.get('expected_date_to', '')"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('confirmation_date_from') or filters.get('confirmation_date_to')">
+                                <span>
+                                    <span class="pal-filter-label">Confirmation Date: </span>
+                                    <t t-esc="filters.get('confirmation_date_from', '')"/>
+                                    <t t-if="filters.get('confirmation_date_from') and filters.get('confirmation_date_to')"> - </t>
+                                    <t t-esc="filters.get('confirmation_date_to', '')"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.vendor_ids">
+                                <span>
+                                    <span class="pal-filter-label">Vendors: </span>
+                                    <t t-esc="', '.join(doc.vendor_ids.mapped('name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.buyer_ids">
+                                <span>
+                                    <span class="pal-filter-label">Buyers: </span>
+                                    <t t-esc="', '.join(doc.buyer_ids.mapped('name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.requested_by_ids">
+                                <span>
+                                    <span class="pal-filter-label">Requested By: </span>
+                                    <t t-esc="', '.join(doc.requested_by_ids.mapped('name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.approved_by_ids">
+                                <span>
+                                    <span class="pal-filter-label">Approved By: </span>
+                                    <t t-esc="', '.join(doc.approved_by_ids.mapped('name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.warehouse_ids">
+                                <span>
+                                    <span class="pal-filter-label">Warehouses: </span>
+                                    <t t-esc="', '.join(doc.warehouse_ids.mapped('name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.product_category_ids">
+                                <span>
+                                    <span class="pal-filter-label">Categories: </span>
+                                    <t t-esc="', '.join(doc.product_category_ids.mapped('complete_name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.product_ids">
+                                <span>
+                                    <span class="pal-filter-label">Products: </span>
+                                    <t t-esc="', '.join(doc.product_ids.mapped('display_name'))"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('purchase_state')">
+                                <span>
+                                    <span class="pal-filter-label">PO State: </span>
+                                    <t t-esc="filters.get('purchase_state')"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('receipt_status')">
+                                <span>
+                                    <span class="pal-filter-label">Receipt Status: </span>
+                                    <t t-esc="filters.get('receipt_status')"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('bill_status')">
+                                <span>
+                                    <span class="pal-filter-label">Bill Status: </span>
+                                    <t t-esc="filters.get('bill_status')"/>
+                                </span>
+                            </t>
+                            <t t-if="filters.get('payment_status')">
+                                <span>
+                                    <span class="pal-filter-label">Payment Status: </span>
+                                    <t t-esc="filters.get('payment_status')"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.department">
+                                <span>
+                                    <span class="pal-filter-label">Department: </span>
+                                    <t t-esc="doc.department"/>
+                                </span>
+                            </t>
+                            <t t-if="doc.branch_label">
+                                <span>
+                                    <span class="pal-filter-label">Branch: </span>
+                                    <t t-esc="doc.branch_label"/>
+                                </span>
+                            </t>
+                            <span>
+                                <span class="pal-filter-label">Group By: </span>
+                                <t t-esc="doc.group_by or 'month'"/>
+                            </span>
+                            <span>
+                                <span class="pal-filter-label">Basis: </span>
+                                <t t-esc="doc.report_basis or 'purchase_amount'"/>
+                            </span>
+                        </div>
+
+                        <!-- KPI SUMMARY CARDS -->
+                        <t t-if="kpis">
+                            <div class="pal-section-title">Key Performance Indicators</div>
+                            <div class="pal-kpi-grid">
+
+                                <t t-if="'total_po_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Total POs</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('total_po_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'total_rfq_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Total RFQs</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('total_rfq_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'total_purchase_amount' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Total Purchase Amount</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('currency_symbol', '')"/>
+                                            <t t-esc="'{:,.2f}'.format(kpis.get('total_purchase_amount', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'total_untaxed_amount' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Untaxed Amount</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('currency_symbol', '')"/>
+                                            <t t-esc="'{:,.2f}'.format(kpis.get('total_untaxed_amount', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'total_tax_amount' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Tax Amount</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('currency_symbol', '')"/>
+                                            <t t-esc="'{:,.2f}'.format(kpis.get('total_tax_amount', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'billed_amount' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Billed Amount</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('currency_symbol', '')"/>
+                                            <t t-esc="'{:,.2f}'.format(kpis.get('billed_amount', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'unbilled_amount' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Unbilled Amount</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('currency_symbol', '')"/>
+                                            <t t-esc="'{:,.2f}'.format(kpis.get('unbilled_amount', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'avg_po_value' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Avg PO Value</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('currency_symbol', '')"/>
+                                            <t t-esc="'{:,.2f}'.format(kpis.get('avg_po_value', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'on_time_delivery_rate' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">On-Time Delivery</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="'{:.1f}'.format(kpis.get('on_time_delivery_rate', 0.0))"/>%
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'late_po_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Late POs</div>
+                                        <div class="pal-kpi-value" style="color: #c0392b;">
+                                            <t t-esc="kpis.get('late_po_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'waiting_approval_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Waiting Approval</div>
+                                        <div class="pal-kpi-value" style="color: #e67e22;">
+                                            <t t-esc="kpis.get('waiting_approval_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'vendor_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Vendors</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('vendor_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'product_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Products</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="kpis.get('product_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'cancelled_po_count' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Cancelled POs</div>
+                                        <div class="pal-kpi-value" style="color: #7f8c8d;">
+                                            <t t-esc="kpis.get('cancelled_po_count', 0)"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="'avg_lead_time_days' in kpis">
+                                    <div class="pal-kpi-card">
+                                        <div class="pal-kpi-label">Avg Lead Time (days)</div>
+                                        <div class="pal-kpi-value">
+                                            <t t-esc="'{:.1f}'.format(kpis.get('avg_lead_time_days', 0.0))"/>
+                                        </div>
+                                    </div>
+                                </t>
+
+                            </div>
+                        </t>
+
+                        <!-- STATUS BREAKDOWN SECTION -->
+                        <t t-if="status_rows">
+                            <div class="pal-section-title">Status Breakdown</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th style="text-align: right;">Count</th>
+                                        <th style="text-align: right;">Amount</th>
+                                        <th style="text-align: right;">% of Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="status_rows" t-as="row">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="row.get('status_label', row.get('status', ''))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="row.get('count', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:.1f}'.format(row.get('percentage', 0.0))"/>%
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- VENDOR SUMMARY TABLE -->
+                        <t t-if="vendor_rows and doc.report_type in [
+                                'purchase_management_summary',
+                                'vendor_performance_report',
+                                'vendor_price_comparison_report',
+                                'purchase_order_analysis_report',
+                                'rfq_analysis_report',
+                                'late_purchase_report',
+                                'unbilled_purchase_report',
+                                'cancelled_purchase_report',
+                            ]">
+                            <div class="pal-section-title">Vendor Summary</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Vendor</th>
+                                        <th style="text-align: right;">PO Count</th>
+                                        <th style="text-align: right;">Total Amount</th>
+                                        <th style="text-align: right;">Avg PO Value</th>
+                                        <th style="text-align: right;">On-Time %</th>
+                                        <th style="text-align: right;">Late Count</th>
+                                        <th style="text-align: right;">Billed Amount</th>
+                                        <th style="text-align: right;">Unbilled Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="vendor_rows" t-as="row">
+                                        <tr>
+                                            <td><t t-esc="row.get('vendor_name', '')"/></td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="row.get('po_count', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('total_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('avg_po_value', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:.1f}'.format(row.get('on_time_rate', 0.0))"/>%
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="row.get('late_count', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('billed_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('unbilled_amount', 0.0))"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- PRODUCT SUMMARY TABLE -->
+                        <t t-if="product_rows and doc.report_type in [
+                                'purchase_management_summary',
+                                'product_purchase_report',
+                                'category_purchase_report',
+                                'requested_product_report',
+                                'unreceived_product_report',
+                                'price_trend_report',
+                                'vendor_price_comparison_report',
+                            ]">
+                            <div class="pal-section-title">Product Summary</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th style="text-align: right;">Ordered Qty</th>
+                                        <th style="text-align: right;">Received Qty</th>
+                                        <th style="text-align: right;">Pending Qty</th>
+                                        <th style="text-align: right;">Unit Price</th>
+                                        <th style="text-align: right;">Total Amount</th>
+                                        <th style="text-align: right;">PO Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="product_rows" t-as="row">
+                                        <tr>
+                                            <td><t t-esc="row.get('product_name', '')"/></td>
+                                            <td><t t-esc="row.get('category_name', '')"/></td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('ordered_qty', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('received_qty', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('pending_qty', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('unit_price', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('total_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="row.get('po_count', 0)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- LATE PURCHASE ORDERS TABLE -->
+                        <t t-if="late_rows and doc.report_type in [
+                                'purchase_management_summary',
+                                'late_purchase_report',
+                                'unfinished_purchase_report',
+                                'unreceived_product_report',
+                            ]">
+                            <div class="page-break"/>
+                            <div class="pal-section-title">Late Purchase Orders</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>PO Reference</th>
+                                        <th>Vendor</th>
+                                        <th>Buyer</th>
+                                        <th>Order Date</th>
+                                        <th>Expected Date</th>
+                                        <th style="text-align: right;">Days Late</th>
+                                        <th style="text-align: right;">Amount</th>
+                                        <th>Receipt Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="late_rows" t-as="row">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="row.get('po_name', row.get('name', ''))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('vendor_name', '')"/></td>
+                                            <td><t t-esc="row.get('buyer_name', '')"/></td>
+                                            <td><t t-esc="row.get('order_date', '')"/></td>
+                                            <td><t t-esc="row.get('expected_date', '')"/></td>
+                                            <td style="text-align: right; color: #c0392b;">
+                                                <t t-esc="row.get('days_late', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_total', row.get('amount', 0.0)))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('receipt_status', '')"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- WAITING APPROVAL TABLE -->
+                        <t t-if="approval_rows and doc.report_type in [
+                                'purchase_management_summary',
+                                'approval_analysis_report',
+                            ]">
+                            <div class="pal-section-title">Waiting Approval</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>PO Reference</th>
+                                        <th>Vendor</th>
+                                        <th>Requested By</th>
+                                        <th>Submitted Date</th>
+                                        <th style="text-align: right;">Days Waiting</th>
+                                        <th style="text-align: right;">Amount</th>
+                                        <th>Approver</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="approval_rows" t-as="row">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="row.get('po_name', row.get('name', ''))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('vendor_name', '')"/></td>
+                                            <td><t t-esc="row.get('requested_by', '')"/></td>
+                                            <td>
+                                                <t t-esc="row.get('submitted_date', row.get('date_order', ''))"/>
+                                            </td>
+                                            <td style="text-align: right; color: #e67e22;">
+                                                <t t-esc="row.get('days_waiting', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_total', row.get('amount', 0.0)))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('approver_name', '')"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- PRICE ALERTS SECTION -->
+                        <t t-if="alert_rows and doc.report_type in [
+                                'purchase_management_summary',
+                                'purchase_alert_report',
+                                'price_trend_report',
+                                'vendor_price_comparison_report',
+                            ]">
+                            <div class="pal-section-title">Price Alerts</div>
+                            <t t-foreach="alert_rows" t-as="alert">
+                                <div class="pal-alert">
+                                    <strong>
+                                        <t t-esc="alert.get('product_name', '')"/>
+                                    </strong>
+                                    <t t-if="alert.get('vendor_name')">
+                                        - <t t-esc="alert.get('vendor_name')"/>
+                                    </t>
+                                    : Previous price
+                                    <t t-esc="'{:,.2f}'.format(alert.get('previous_price', 0.0))"/>
+                                    - Current price
+                                    <t t-esc="'{:,.2f}'.format(alert.get('current_price', 0.0))"/>
+                                    <t t-if="alert.get('change_percentage') is not False">
+                                        (<t t-esc="'{:+.1f}'.format(alert.get('change_percentage', 0.0))"/>%)
+                                    </t>
+                                    <t t-if="alert.get('po_name')">
+                                        [<t t-esc="alert.get('po_name')"/>]
+                                    </t>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- GENERIC GROUPED DATA TABLE -->
+                        <t t-set="grouped_rows" t-value="report_data.get('grouped_rows', [])"/>
+                        <t t-if="grouped_rows">
+                            <div class="pal-section-title">
+                                Grouped Data - by <t t-esc="doc.group_by or 'period'"/>
+                            </div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Period / Group</th>
+                                        <th style="text-align: right;">PO Count</th>
+                                        <th style="text-align: right;">RFQ Count</th>
+                                        <th style="text-align: right;">Total Amount</th>
+                                        <th style="text-align: right;">Untaxed Amount</th>
+                                        <th style="text-align: right;">Billed Amount</th>
+                                        <th style="text-align: right;">Unbilled Amount</th>
+                                        <th style="text-align: right;">Ordered Qty</th>
+                                        <th style="text-align: right;">Received Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="grouped_rows" t-as="row">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="row.get('label', row.get('group_key', ''))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="row.get('po_count', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="row.get('rfq_count', 0)"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('total_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('untaxed_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('billed_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('unbilled_amount', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('ordered_qty', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('received_qty', 0.0))"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- RAW PURCHASE ORDERS (optional detail) -->
+                        <t t-set="raw_orders" t-value="report_data.get('raw_orders', [])"/>
+                        <t t-if="raw_orders and doc.include_raw_orders">
+                            <div class="page-break"/>
+                            <div class="pal-section-title">Purchase Orders Detail</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Vendor</th>
+                                        <th>Buyer</th>
+                                        <th>Order Date</th>
+                                        <th>Confirmation Date</th>
+                                        <th>State</th>
+                                        <th style="text-align: right;">Untaxed Amount</th>
+                                        <th style="text-align: right;">Total Amount</th>
+                                        <th>Receipt Status</th>
+                                        <th>Bill Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="raw_orders" t-as="row">
+                                        <tr>
+                                            <td><t t-esc="row.get('name', '')"/></td>
+                                            <td><t t-esc="row.get('vendor_name', '')"/></td>
+                                            <td><t t-esc="row.get('buyer_name', '')"/></td>
+                                            <td><t t-esc="row.get('date_order', '')"/></td>
+                                            <td><t t-esc="row.get('date_approve', '')"/></td>
+                                            <td><t t-esc="row.get('state', '')"/></td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_untaxed', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_total', 0.0))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('receipt_status', '')"/></td>
+                                            <td><t t-esc="row.get('invoice_status', '')"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- RAW PO LINES (optional detail) -->
+                        <t t-set="raw_lines" t-value="report_data.get('raw_lines', [])"/>
+                        <t t-if="raw_lines and doc.include_raw_lines">
+                            <div class="page-break"/>
+                            <div class="pal-section-title">Purchase Order Lines Detail</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>PO Reference</th>
+                                        <th>Product</th>
+                                        <th>Description</th>
+                                        <th style="text-align: right;">Qty Ordered</th>
+                                        <th style="text-align: right;">Qty Received</th>
+                                        <th style="text-align: right;">Qty Billed</th>
+                                        <th style="text-align: right;">Unit Price</th>
+                                        <th style="text-align: right;">Subtotal</th>
+                                        <th>UoM</th>
+                                        <th>Expected Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="raw_lines" t-as="row">
+                                        <tr>
+                                            <td><t t-esc="row.get('order_name', '')"/></td>
+                                            <td><t t-esc="row.get('product_name', '')"/></td>
+                                            <td><t t-esc="row.get('name', '')"/></td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('product_qty', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('qty_received', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('qty_invoiced', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('price_unit', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('price_subtotal', 0.0))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('uom_name', '')"/></td>
+                                            <td><t t-esc="row.get('date_planned', '')"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- RECEIPT DETAILS (optional) -->
+                        <t t-set="receipt_rows" t-value="report_data.get('receipt_details', [])"/>
+                        <t t-if="receipt_rows and doc.include_receipts">
+                            <div class="page-break"/>
+                            <div class="pal-section-title">Receipt Details</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Receipt Reference</th>
+                                        <th>PO Reference</th>
+                                        <th>Vendor</th>
+                                        <th>Receipt Date</th>
+                                        <th>State</th>
+                                        <th>Product</th>
+                                        <th style="text-align: right;">Done Qty</th>
+                                        <th style="text-align: right;">Demand Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="receipt_rows" t-as="row">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="row.get('receipt_name', row.get('name', ''))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('po_name', '')"/></td>
+                                            <td><t t-esc="row.get('vendor_name', '')"/></td>
+                                            <td><t t-esc="row.get('date_done', '')"/></td>
+                                            <td><t t-esc="row.get('state', '')"/></td>
+                                            <td><t t-esc="row.get('product_name', '')"/></td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('qty_done', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.3f}'.format(row.get('product_uom_qty', 0.0))"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- BILL DETAILS (optional) -->
+                        <t t-set="bill_rows" t-value="report_data.get('bill_details', [])"/>
+                        <t t-if="bill_rows and doc.include_bills">
+                            <div class="page-break"/>
+                            <div class="pal-section-title">Bill Details</div>
+                            <table class="pal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Bill Reference</th>
+                                        <th>PO Reference</th>
+                                        <th>Vendor</th>
+                                        <th>Bill Date</th>
+                                        <th>Due Date</th>
+                                        <th>State</th>
+                                        <th style="text-align: right;">Amount Untaxed</th>
+                                        <th style="text-align: right;">Amount Total</th>
+                                        <th style="text-align: right;">Amount Due</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="bill_rows" t-as="row">
+                                        <tr>
+                                            <td>
+                                                <t t-esc="row.get('bill_name', row.get('name', ''))"/>
+                                            </td>
+                                            <td><t t-esc="row.get('po_name', '')"/></td>
+                                            <td><t t-esc="row.get('vendor_name', '')"/></td>
+                                            <td><t t-esc="row.get('invoice_date', '')"/></td>
+                                            <td><t t-esc="row.get('invoice_date_due', '')"/></td>
+                                            <td><t t-esc="row.get('state', '')"/></td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_untaxed', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_total', 0.0))"/>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(row.get('amount_residual', 0.0))"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- FOOTER -->
+                        <div style="margin-top: 16px; border-top: 1px solid #ddd; padding-top: 4px;">
+                            <span class="pal-meta">
+                                <t t-esc="env.company.name"/> -
+                                Purchase Analytics Report -
+                                <t t-esc="report_title"/>
+                            </span>
+                        </div>
+
+                    </div>
+                </t>
+
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Main Purchase Analytics Dashboard Client Action
+         This is the single entry-point client action.  Every menu item
+         that renders the dashboard passes a different "mode" value in its
+         own context so the OWL component can switch views without
+         needing a separate ir.actions.client record per mode.
+    ================================================================ -->
+
+    <record id="action_purchase_analytics_dashboard" model="ir.actions.client">
+        <field name="name">Purchase Analytics Dashboard</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "live_dashboard"}</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

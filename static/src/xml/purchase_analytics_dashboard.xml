@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<!-- ─── MAIN DASHBOARD ─────────────────────────────────────── -->
+<t t-name="purchase_analytics_dashboard" owl="1">
+    <div class="pal-dashboard">
+        <!-- Loading State -->
+        <div t-if="state.loading" class="pal-loading">
+            <div class="pal-spinner"/>
+            <p>Loading Purchase Analytics...</p>
+        </div>
+
+        <!-- Error State -->
+        <div t-elif="state.error" class="pal-error">
+            <i class="fa fa-exclamation-triangle fa-3x"/>
+            <h4>Failed to load analytics</h4>
+            <p t-esc="state.error"/>
+            <button class="btn btn-primary btn-sm" t-on-click="loadData">Retry</button>
+        </div>
+
+        <!-- Main Content -->
+        <div t-else="">
+            <!-- Page Header -->
+            <div class="pal-page-header d-flex align-items-center justify-content-between mb-2">
+                <h4 class="pal-page-title mb-0">
+                    <i class="fa fa-bar-chart me-2" style="color:#1a6496"/>
+                    <t t-esc="getPageTitle()"/>
+                </h4>
+                <div class="pal-header-actions">
+                    <button class="btn btn-sm btn-outline-secondary me-1" t-on-click="refreshData" title="Refresh">
+                        <i t-att-class="state.refreshing ? 'fa fa-spinner fa-spin' : 'fa fa-refresh'"/>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary me-1" t-on-click="openReportWizard">
+                        <i class="fa fa-download me-1"/>Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Panel -->
+            <div class="pal-filter-panel card mb-3">
+                <div class="card-body py-2">
+                    <div class="pal-filter-row row g-2 align-items-end">
+                        <div class="col-auto">
+                            <label class="pal-filter-label">Date Range</label>
+                            <select class="form-select form-select-sm" t-model="filters.date_range"
+                                    t-on-change="onFilterChange">
+                                <option value="today">Today</option>
+                                <option value="this_week">This Week</option>
+                                <option value="this_month">This Month</option>
+                                <option value="this_quarter">This Quarter</option>
+                                <option value="this_year">This Year</option>
+                                <option value="last_7_days">Last 7 Days</option>
+                                <option value="last_30_days">Last 30 Days</option>
+                                <option value="last_90_days">Last 90 Days</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div t-if="filters.date_range === 'custom'" class="col-auto">
+                            <label class="pal-filter-label">From</label>
+                            <input type="date" class="form-control form-control-sm" t-model="filters.date_start"
+                                   t-on-change="onFilterChange"/>
+                        </div>
+                        <div t-if="filters.date_range === 'custom'" class="col-auto">
+                            <label class="pal-filter-label">To</label>
+                            <input type="date" class="form-control form-control-sm" t-model="filters.date_end"
+                                   t-on-change="onFilterChange"/>
+                        </div>
+                        <div class="col-auto">
+                            <label class="pal-filter-label">Report Basis</label>
+                            <select class="form-select form-select-sm" t-model="filters.report_basis"
+                                    t-on-change="onFilterChange">
+                                <option value="purchase_amount">Purchase Amount</option>
+                                <option value="untaxed_amount">Untaxed Amount</option>
+                                <option value="ordered_quantity">Ordered Quantity</option>
+                                <option value="received_quantity">Received Quantity</option>
+                                <option value="pending_quantity">Pending Quantity</option>
+                                <option value="po_count">PO Count</option>
+                                <option value="billed_amount">Billed Amount</option>
+                                <option value="unbilled_amount">Unbilled Amount</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label class="pal-filter-label">Group By</label>
+                            <select class="form-select form-select-sm" t-model="filters.group_by"
+                                    t-on-change="onFilterChange">
+                                <option value="day">Day</option>
+                                <option value="week">Week</option>
+                                <option value="month">Month</option>
+                                <option value="year">Year</option>
+                                <option value="vendor">Vendor</option>
+                                <option value="buyer">Buyer</option>
+                                <option value="product">Product</option>
+                                <option value="purchase_status">Status</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <div class="pal-quick-filters">
+                                <div class="form-check form-check-inline form-check-sm">
+                                    <input class="form-check-input" type="checkbox" id="chk_late"
+                                           t-model="filters.only_late" t-on-change="onFilterChange"/>
+                                    <label class="form-check-label text-danger" for="chk_late">Late</label>
+                                </div>
+                                <div class="form-check form-check-inline form-check-sm">
+                                    <input class="form-check-input" type="checkbox" id="chk_waiting"
+                                           t-model="filters.only_waiting_approval" t-on-change="onFilterChange"/>
+                                    <label class="form-check-label text-warning" for="chk_waiting">Waiting Approval</label>
+                                </div>
+                                <div class="form-check form-check-inline form-check-sm">
+                                    <input class="form-check-input" type="checkbox" id="chk_unreceived"
+                                           t-model="filters.only_unreceived" t-on-change="onFilterChange"/>
+                                    <label class="form-check-label" for="chk_unreceived">Unreceived</label>
+                                </div>
+                                <div class="form-check form-check-inline form-check-sm">
+                                    <input class="form-check-input" type="checkbox" id="chk_unbilled"
+                                           t-model="filters.only_unbilled" t-on-change="onFilterChange"/>
+                                    <label class="form-check-label" for="chk_unbilled">Unbilled</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button class="btn btn-sm btn-secondary me-1" t-on-click="resetFilters">
+                                <i class="fa fa-times me-1"/>Reset
+                            </button>
+                            <button class="btn btn-sm btn-primary" t-on-click="applyFilters">
+                                <i class="fa fa-search me-1"/>Apply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <ul class="pal-tabs nav nav-tabs mb-3">
+                <t t-foreach="tabs" t-as="tab" t-key="tab.mode">
+                    <li class="nav-item">
+                        <a t-att-class="'nav-link pal-tab' + (state.mode === tab.mode ? ' active' : '')"
+                           t-on-click="() => this.switchMode(tab.mode)" href="#" t-esc="tab.label"/>
+                    </li>
+                </t>
+            </ul>
+
+            <!-- ─── LIVE DASHBOARD ─────────────────── -->
+            <div t-if="state.mode === 'live_dashboard'" class="pal-mode-content">
+                <t t-if="state.data">
+                    <!-- KPI Grid -->
+                    <div class="pal-section-header">
+                        <span>Key Performance Indicators</span>
+                        <small class="text-muted ms-2" t-esc="'Basis: ' + (state.data.basis_label || 'Purchase Amount')"/>
+                    </div>
+                    <div class="pal-kpi-grid row g-2 mb-3">
+                        <t t-set="k" t-value="state.data.kpis or {}"/>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Total RFQs'"/>
+                                <t t-set="kpi_value" t-value="k.total_rfqs or 0"/>
+                                <t t-set="kpi_css" t-value="'info'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Waiting Approval'"/>
+                                <t t-set="kpi_value" t-value="k.waiting_approval or 0"/>
+                                <t t-set="kpi_css" t-value="(k.waiting_approval or 0) > 0 ? 'warning' : 'success'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Approved POs'"/>
+                                <t t-set="kpi_value" t-value="k.approved_pos or 0"/>
+                                <t t-set="kpi_css" t-value="'success'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Late POs'"/>
+                                <t t-set="kpi_value" t-value="k.late_po_count or 0"/>
+                                <t t-set="kpi_css" t-value="(k.late_po_count or 0) > 0 ? 'danger' : 'success'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Purchase Amount'"/>
+                                <t t-set="kpi_value" t-value="formatCurrency(k.total_purchase_amount)"/>
+                                <t t-set="kpi_css" t-value="'primary'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Unbilled Amount'"/>
+                                <t t-set="kpi_value" t-value="formatCurrency(k.unbilled_amount)"/>
+                                <t t-set="kpi_css" t-value="(k.unbilled_amount or 0) > 0 ? 'warning' : 'success'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Ordered Qty'"/>
+                                <t t-set="kpi_value" t-value="formatQty(k.total_ordered_qty)"/>
+                                <t t-set="kpi_css" t-value="'info'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Pending Receipt'"/>
+                                <t t-set="kpi_value" t-value="formatQty(k.pending_receipt_qty)"/>
+                                <t t-set="kpi_css" t-value="(k.pending_receipt_qty or 0) > 0 ? 'warning' : 'success'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Avg PO Value'"/>
+                                <t t-set="kpi_value" t-value="formatCurrency(k.avg_po_value)"/>
+                                <t t-set="kpi_css" t-value="'info'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Top Vendor'"/>
+                                <t t-set="kpi_value" t-value="k.top_vendor or 'N/A'"/>
+                                <t t-set="kpi_css" t-value="'info'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Top Product'"/>
+                                <t t-set="kpi_value" t-value="k.top_product or 'N/A'"/>
+                                <t t-set="kpi_css" t-value="'info'"/>
+                            </t>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <t t-call="pal_kpi_card">
+                                <t t-set="kpi_label" t-value="'Cancelled'"/>
+                                <t t-set="kpi_value" t-value="k.cancelled or 0"/>
+                                <t t-set="kpi_css" t-value="(k.cancelled or 0) > 0 ? 'danger' : ''"/>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="pal-chart-row row g-3 mb-3">
+                        <div class="col-md-8">
+                            <div class="pal-chart-container card">
+                                <div class="card-body">
+                                    <div class="pal-chart-title">Purchase Amount Trend</div>
+                                    <t t-if="state.data.purchase_amount_trend and state.data.purchase_amount_trend.length">
+                                        <t t-call="pal_bar_chart">
+                                            <t t-set="chart_data" t-value="state.data.purchase_amount_trend"/>
+                                            <t t-set="chart_label_key" t-value="'period'"/>
+                                            <t t-set="chart_value_key" t-value="'purchase_amount'"/>
+                                            <t t-set="chart_height" t-value="200"/>
+                                        </t>
+                                    </t>
+                                    <t t-else=""><div class="pal-empty">No trend data for selected period</div></t>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="pal-chart-container card">
+                                <div class="card-body">
+                                    <div class="pal-chart-title">Status Distribution</div>
+                                    <t t-if="state.data.status_breakdown and state.data.status_breakdown.length">
+                                        <t t-call="pal_donut_chart">
+                                            <t t-set="chart_data" t-value="state.data.status_breakdown"/>
+                                            <t t-set="chart_label_key" t-value="'label'"/>
+                                            <t t-set="chart_value_key" t-value="'count'"/>
+                                        </t>
+                                    </t>
+                                    <t t-else=""><div class="pal-empty">No data</div></t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Waiting Approval Table -->
+                    <t t-if="state.data.waiting_approval and state.data.waiting_approval.length">
+                        <div class="pal-section-header mb-2">
+                            <span>Waiting Approval</span>
+                            <span t-att-class="'pal-badge pal-badge-warning ms-2'" t-esc="state.data.waiting_approval.length"/>
+                        </div>
+                        <div class="pal-table-section card mb-3">
+                            <div class="card-body p-0">
+                                <table class="pal-table table table-sm table-hover mb-0">
+                                    <thead><tr>
+                                        <th>PO Reference</th><th>Vendor</th><th>Buyer</th>
+                                        <th>Order Date</th><th>Amount</th><th>Days Waiting</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.waiting_approval" t-as="row" t-key="row.id">
+                                            <tr t-att-class="row.days_waiting > 7 ? 'warning-row' : ''">
+                                                <td><t t-esc="row.po_ref"/></td>
+                                                <td><t t-esc="row.vendor_name"/></td>
+                                                <td><t t-esc="row.buyer_name"/></td>
+                                                <td><t t-esc="row.order_date"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(row.amount_total)"/></td>
+                                                <td t-att-class="'text-center' + (row.days_waiting > 3 ? ' text-danger fw-bold' : '')">
+                                                    <t t-esc="row.days_waiting"/> days
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Late POs Table -->
+                    <t t-if="state.data.late_pos and state.data.late_pos.length">
+                        <div class="pal-section-header mb-2">
+                            <span>Late Purchase Orders</span>
+                            <span class="pal-badge pal-badge-danger ms-2" t-esc="state.data.late_pos.length"/>
+                        </div>
+                        <div class="pal-table-section card mb-3">
+                            <div class="card-body p-0">
+                                <table class="pal-table table table-sm table-hover mb-0">
+                                    <thead><tr>
+                                        <th>PO Reference</th><th>Vendor</th><th>Buyer</th>
+                                        <th>Expected Date</th><th>Ordered</th><th>Received</th>
+                                        <th>Pending</th><th>Late Days</th><th>Amount</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.late_pos" t-as="row" t-key="row.id">
+                                            <tr class="late-row">
+                                                <td><t t-esc="row.po_ref"/></td>
+                                                <td><t t-esc="row.vendor_name"/></td>
+                                                <td><t t-esc="row.buyer_name"/></td>
+                                                <td><t t-esc="row.expected_date"/></td>
+                                                <td class="text-end"><t t-esc="formatQty(row.ordered_qty)"/></td>
+                                                <td class="text-end"><t t-esc="formatQty(row.received_qty)"/></td>
+                                                <td class="text-end text-danger"><t t-esc="formatQty(row.pending_qty)"/></td>
+                                                <td class="text-center text-danger fw-bold"><t t-esc="row.late_days"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(row.amount_total)"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Price Alerts -->
+                    <t t-if="state.data.price_change_alerts and state.data.price_change_alerts.length">
+                        <div class="pal-section-header mb-2">
+                            <span>Price Increase Alerts</span>
+                            <span class="pal-badge pal-badge-warning ms-2" t-esc="state.data.price_change_alerts.length"/>
+                        </div>
+                        <div class="pal-table-section card mb-3">
+                            <div class="card-body p-0">
+                                <table class="pal-table table table-sm table-hover mb-0">
+                                    <thead><tr>
+                                        <th>Product</th><th>Vendor</th><th>Previous Price</th>
+                                        <th>Latest Price</th><th>Change</th><th>Change %</th><th>Last Date</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.price_change_alerts" t-as="row" t-key="row.product_id + '_' + row.vendor_id">
+                                            <tr class="warning-row">
+                                                <td><t t-esc="row.product_name"/></td>
+                                                <td><t t-esc="row.vendor_name"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(row.prev_price)"/></td>
+                                                <td class="text-end text-danger"><t t-esc="formatCurrency(row.latest_price)"/></td>
+                                                <td class="text-end text-danger">+<t t-esc="formatCurrency(row.price_change)"/></td>
+                                                <td class="text-end text-danger fw-bold">+<t t-esc="(row.pct_change * 100).toFixed(1)"/>%</td>
+                                                <td><t t-esc="row.last_purchase_date"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Vendor Summary -->
+                    <t t-if="state.data.vendor_summary and state.data.vendor_summary.length">
+                        <div class="pal-section-header mb-2"><span>Vendor Summary (Top 20)</span></div>
+                        <div class="pal-table-section card mb-3">
+                            <div class="card-body p-0">
+                                <table class="pal-table table table-sm table-hover mb-0">
+                                    <thead><tr>
+                                        <th>Vendor</th><th>RFQs</th><th>POs</th>
+                                        <th>Total Amount</th><th>Avg PO Value</th><th>Last Purchase</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.vendor_summary" t-as="row" t-key="row.vendor_id">
+                                            <tr>
+                                                <td><t t-esc="row.vendor_name"/></td>
+                                                <td class="text-center"><t t-esc="row.rfq_count"/></td>
+                                                <td class="text-center"><t t-esc="row.po_count"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(row.total_amount)"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(row.avg_po_value)"/></td>
+                                                <td><t t-esc="row.last_purchase_date"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <t t-else=""><div class="pal-empty"><i class="fa fa-bar-chart fa-3x mb-2 text-muted"/><p>No data available for the selected period.</p></div></t>
+            </div>
+
+            <!-- ─── PURCHASE REQUEST ANALYSIS ─────── -->
+            <div t-if="state.mode === 'purchase_request_analysis'" class="pal-mode-content">
+                <t t-if="state.data">
+                    <t t-if="state.data.disabled">
+                        <div class="alert alert-warning"><i class="fa fa-info-circle me-2"/>Purchase Request Analytics is disabled in settings.</div>
+                    </t>
+                    <t t-else="">
+                        <t t-if="state.data.fallback_message">
+                            <div class="alert alert-info mb-3"><i class="fa fa-info-circle me-2"/><t t-esc="state.data.fallback_message"/></div>
+                        </t>
+                        <div class="pal-section-header mb-2"><span>Purchase Request KPIs</span></div>
+                        <div class="pal-kpi-grid row g-2 mb-3">
+                            <t t-set="k" t-value="state.data.kpis or {}"/>
+                            <t t-foreach="Object.entries(k)" t-as="kv" t-key="kv[0]">
+                                <div class="col-6 col-md-3 col-lg-2">
+                                    <t t-call="pal_kpi_card">
+                                        <t t-set="kpi_label" t-value="kv[0].replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())"/>
+                                        <t t-set="kpi_value" t-value="typeof kv[1] === 'number' ? kv[1] : String(kv[1])"/>
+                                        <t t-set="kpi_css" t-value="'info'"/>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                        <t t-if="state.data.status_breakdown and state.data.status_breakdown.length">
+                            <div class="pal-section-header mb-2"><span>Status Breakdown</span></div>
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm mb-0">
+                                        <thead><tr><th>Status</th><th>Count</th><th>Amount</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.status_breakdown" t-as="row" t-key="row.status">
+                                                <tr>
+                                                    <td><t t-esc="row.status"/></td>
+                                                    <td class="text-center"><t t-esc="row.count"/></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.amount)"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+                <t t-else=""><div class="pal-loading"><div class="pal-spinner"/></div></t>
+            </div>
+
+            <!-- ─── RFQ ANALYSIS ──────────────────── -->
+            <div t-if="state.mode === 'rfq_analysis'" class="pal-mode-content">
+                <t t-if="state.data">
+                    <t t-if="state.data.disabled">
+                        <div class="alert alert-warning">RFQ Analytics is disabled in settings.</div>
+                    </t>
+                    <t t-else="">
+                        <t t-set="k" t-value="state.data.kpis or {}"/>
+                        <div class="pal-section-header mb-2"><span>RFQ Analysis</span></div>
+                        <div class="pal-kpi-grid row g-2 mb-3">
+                            <div class="col-6 col-md-3 col-lg-2">
+                                <t t-call="pal_kpi_card"><t t-set="kpi_label" t-value="'Total RFQs'"/><t t-set="kpi_value" t-value="k.total_rfqs or 0"/><t t-set="kpi_css" t-value="'info'"/></t>
+                            </div>
+                            <div class="col-6 col-md-3 col-lg-2">
+                                <t t-call="pal_kpi_card"><t t-set="kpi_label" t-value="'Draft RFQs'"/><t t-set="kpi_value" t-value="k.draft_rfqs or 0"/><t t-set="kpi_css" t-value="''"/></t>
+                            </div>
+                            <div class="col-6 col-md-3 col-lg-2">
+                                <t t-call="pal_kpi_card"><t t-set="kpi_label" t-value="'Sent RFQs'"/><t t-set="kpi_value" t-value="k.sent_rfqs or 0"/><t t-set="kpi_css" t-value="'warning'"/></t>
+                            </div>
+                            <div class="col-6 col-md-3 col-lg-2">
+                                <t t-call="pal_kpi_card"><t t-set="kpi_label" t-value="'Estimated Amount'"/><t t-set="kpi_value" t-value="formatCurrency(k.estimated_amount)"/><t t-set="kpi_css" t-value="'primary'"/></t>
+                            </div>
+                            <div class="col-6 col-md-3 col-lg-2">
+                                <t t-call="pal_kpi_card"><t t-set="kpi_label" t-value="'Oldest RFQ (days)'"/><t t-set="kpi_value" t-value="k.oldest_rfq_days != null ? k.oldest_rfq_days : 'N/A'"/><t t-set="kpi_css" t-value="(k.oldest_rfq_days or 0) > 14 ? 'danger' : 'info'"/></t>
+                            </div>
+                        </div>
+                        <t t-if="state.data.raw_rfqs and state.data.raw_rfqs.length">
+                            <div class="pal-section-header mb-2"><span>RFQ List</span></div>
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>Reference</th><th>Vendor</th><th>Buyer</th><th>Order Date</th><th>Expected</th><th>Status</th><th>Amount</th><th>Days Old</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.raw_rfqs" t-as="row" t-key="row.id">
+                                                <tr t-att-class="row.days_since_created > 14 ? 'warning-row' : ''">
+                                                    <td><t t-esc="row.po_ref"/></td>
+                                                    <td><t t-esc="row.vendor_name"/></td>
+                                                    <td><t t-esc="row.buyer_name"/></td>
+                                                    <td><t t-esc="row.order_date"/></td>
+                                                    <td><t t-esc="row.expected_date"/></td>
+                                                    <td><span t-att-class="'pal-status-pill status-' + row.state"><t t-esc="row.state"/></span></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.estimated_amount)"/></td>
+                                                    <td class="text-center"><t t-esc="row.days_since_created"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+                <t t-else=""><div class="pal-loading"><div class="pal-spinner"/></div></t>
+            </div>
+
+            <!-- ─── GENERIC MODE CONTENT ──────────── -->
+            <!-- Reused for modes that share a common layout -->
+            <div t-if="['purchase_order_analysis','vendor_analysis','product_purchase_analysis','receipt_matching','bill_matching','approval_analysis','late_unfinished_purchases','price_trend_analysis','vendor_scorecards','purchase_targets','purchase_alerts'].includes(state.mode)"
+                 class="pal-mode-content">
+                <t t-if="state.loading_mode">
+                    <div class="pal-loading"><div class="pal-spinner"/><p>Loading...</p></div>
+                </t>
+                <t t-elif="state.data and state.data.disabled">
+                    <div class="alert alert-warning"><i class="fa fa-info-circle me-2"/>This analytics section is disabled in settings.</div>
+                </t>
+                <t t-elif="state.data">
+                    <!-- KPIs -->
+                    <t t-if="state.data.kpis">
+                        <div class="pal-section-header mb-2"><span>Key Metrics</span></div>
+                        <div class="pal-kpi-grid row g-2 mb-3">
+                            <t t-foreach="Object.entries(state.data.kpis)" t-as="kv" t-key="kv[0]">
+                                <div class="col-6 col-md-3 col-lg-2">
+                                    <t t-call="pal_kpi_card">
+                                        <t t-set="kpi_label" t-value="kv[0].replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())"/>
+                                        <t t-set="kpi_value" t-value="typeof kv[1] === 'number' ? (kv[1] % 1 === 0 ? kv[1] : kv[1].toFixed(2)) : String(kv[1] != null ? kv[1] : 'N/A')"/>
+                                        <t t-set="kpi_css" t-value="'info'"/>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Generic data tables based on mode -->
+                    <t t-if="state.mode === 'vendor_scorecards' and state.data.scorecards and state.data.scorecards.length">
+                        <div class="pal-section-header mb-2"><span>Vendor Scorecards</span></div>
+                        <div class="pal-table-section card mb-3">
+                            <div class="card-body p-0">
+                                <table class="pal-table table table-sm table-hover mb-0">
+                                    <thead><tr><th>Vendor</th><th>POs</th><th>Amount</th><th>On-Time %</th><th>Avg Lead (days)</th><th>Late Count</th><th>Price Stability</th><th>Overall Score</th></tr></thead>
+                                    <tbody>
+                                        <t t-foreach="state.data.scorecards" t-as="row" t-key="row.vendor_id">
+                                            <tr>
+                                                <td><t t-esc="row.vendor_name"/></td>
+                                                <td class="text-center"><t t-esc="row.po_count"/></td>
+                                                <td class="text-end"><t t-esc="formatCurrency(row.total_amount)"/></td>
+                                                <td class="text-center"><t t-esc="row.on_time_pct"/>%</td>
+                                                <td class="text-center"><t t-esc="row.avg_lead_time"/></td>
+                                                <td t-att-class="'text-center' + (row.late_count > 0 ? ' text-danger' : ' text-success')"><t t-esc="row.late_count"/></td>
+                                                <td class="text-center">
+                                                    <div class="pal-score-bar">
+                                                        <div class="pal-score-fill" t-att-style="'width:' + Math.min(100, row.price_stability_score) + '%'"/>
+                                                    </div>
+                                                    <small><t t-esc="row.price_stability_score"/></small>
+                                                </td>
+                                                <td t-att-class="'text-center fw-bold ' + (row.overall_score >= 80 ? 'text-success' : row.overall_score >= 60 ? 'text-warning' : 'text-danger')">
+                                                    <t t-esc="row.overall_score"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
+                    <t t-if="state.mode === 'purchase_targets' and state.data.target_rows">
+                        <div class="pal-section-header mb-2"><span>Purchase Targets</span></div>
+                        <t t-if="!state.data.target_rows.length">
+                            <div class="pal-empty"><i class="fa fa-bullseye fa-3x mb-2 text-muted"/><p>No purchase targets configured. <a href="#" t-on-click="openTargetForm">Add a target</a></p></div>
+                        </t>
+                        <t t-else="">
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>Target</th><th>Scope</th><th>Period</th><th>Target Amt</th><th>Actual</th><th>Achievement</th><th>Max Budget</th><th>Budget Used</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.target_rows" t-as="row" t-key="row.id">
+                                                <tr>
+                                                    <td><t t-esc="row.name"/></td>
+                                                    <td><small><t t-esc="[row.vendor_name, row.product_name, row.category_name, row.buyer_name].filter(Boolean).join(', ') || 'Company-wide'"/></small></td>
+                                                    <td><small><t t-esc="row.date_start"/> – <t t-esc="row.date_end"/></small></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.target_amount)"/></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.actual_amount)"/></td>
+                                                    <td>
+                                                        <div class="pal-score-bar">
+                                                            <div t-att-class="'pal-score-fill ' + (row.achievement_pct >= 100 ? 'bg-success' : row.achievement_pct >= 75 ? 'bg-warning' : 'bg-danger')"
+                                                                 t-att-style="'width:' + Math.min(100, row.achievement_pct) + '%'"/>
+                                                        </div>
+                                                        <small><t t-esc="row.achievement_pct"/>%</small>
+                                                    </td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.maximum_amount)"/></td>
+                                                    <td>
+                                                        <t t-if="row.maximum_amount > 0">
+                                                            <small t-att-class="row.budget_used_pct > 100 ? 'text-danger fw-bold' : ''">
+                                                                <t t-esc="row.budget_used_pct"/>%
+                                                            </small>
+                                                        </t>
+                                                        <t t-else=""><small class="text-muted">N/A</small></t>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <t t-if="state.mode === 'purchase_alerts' and state.data.alert_rows">
+                        <div class="pal-section-header mb-2">
+                            <span>Active Alerts</span>
+                            <span t-att-class="'pal-badge ms-2 ' + (state.data.total_alerts > 0 ? 'pal-badge-danger' : 'pal-badge-success')" t-esc="state.data.total_alerts or 0"/>
+                        </div>
+                        <t t-if="!state.data.alert_rows.length">
+                            <div class="pal-empty text-success"><i class="fa fa-check-circle fa-3x mb-2"/><p>No active alerts. All purchases are on track.</p></div>
+                        </t>
+                        <t t-else="">
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm mb-0">
+                                        <thead><tr><th>Alert Type</th><th>Description</th><th>Vendor</th><th>Details</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.alert_rows" t-as="row" t-key="row_index">
+                                                <tr class="warning-row">
+                                                    <td><span class="pal-badge pal-badge-warning"><t t-esc="row.type.replace(/_/g,' ')"/></span></td>
+                                                    <td><t t-esc="row.description"/></td>
+                                                    <td><t t-esc="row.vendor or ''"/></td>
+                                                    <td><small class="text-muted"><t t-esc="row.amount ? formatCurrency(row.amount) : (row.latest_price ? formatCurrency(row.latest_price) : '')"/></small></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- Receipt Matching -->
+                    <t t-if="state.mode === 'receipt_matching' and state.data.receipt_rows">
+                        <div class="pal-section-header mb-2"><span>Receipt Matching</span></div>
+                        <t t-if="state.data.receipt_rows.length">
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>PO Ref</th><th>Receipt</th><th>Vendor</th><th>Expected</th><th>Done</th><th>Ordered</th><th>Received</th><th>Pending</th><th>Late Days</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.receipt_rows" t-as="row" t-key="row_index">
+                                                <tr t-att-class="row.late_days > 0 ? 'late-row' : ''">
+                                                    <td><t t-esc="row.po_ref"/></td>
+                                                    <td><t t-esc="row.receipt_ref"/></td>
+                                                    <td><t t-esc="row.vendor_name"/></td>
+                                                    <td><t t-esc="row.expected_date"/></td>
+                                                    <td><t t-esc="row.receipt_date"/></td>
+                                                    <td class="text-end"><t t-esc="formatQty(row.ordered_qty)"/></td>
+                                                    <td class="text-end"><t t-esc="formatQty(row.received_qty)"/></td>
+                                                    <td class="text-end text-danger"><t t-esc="formatQty(row.pending_qty)"/></td>
+                                                    <td t-att-class="'text-center' + (row.late_days > 0 ? ' text-danger fw-bold' : '')"><t t-esc="row.late_days"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-else=""><div class="pal-empty"><p>No receipt matching data for the selected period.</p></div></t>
+                    </t>
+
+                    <!-- Bill Matching -->
+                    <t t-if="state.mode === 'bill_matching' and state.data.bill_rows">
+                        <div class="pal-section-header mb-2"><span>Bill Matching</span></div>
+                        <t t-if="state.data.bill_rows.length">
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>PO Ref</th><th>Vendor</th><th>Bill Ref</th><th>Bill Date</th><th>Due Date</th><th>State</th><th>Payment</th><th>Amount</th><th>Residual</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.bill_rows" t-as="row" t-key="row.bill_id">
+                                                <tr t-att-class="row.is_overdue ? 'late-row' : ''">
+                                                    <td><t t-esc="row.po_ref"/></td>
+                                                    <td><t t-esc="row.vendor_name"/></td>
+                                                    <td><t t-esc="row.bill_ref"/></td>
+                                                    <td><t t-esc="row.invoice_date"/></td>
+                                                    <td t-att-class="row.is_overdue ? 'text-danger' : ''"><t t-esc="row.due_date"/></td>
+                                                    <td><span t-att-class="'pal-status-pill status-' + row.bill_state"><t t-esc="row.bill_state"/></span></td>
+                                                    <td><t t-esc="row.payment_state"/></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.amount_total)"/></td>
+                                                    <td t-att-class="'text-end' + (row.amount_residual > 0 ? ' text-danger' : ' text-success')"><t t-esc="formatCurrency(row.amount_residual)"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-else=""><div class="pal-empty"><p>No vendor bills found for the selected period.</p></div></t>
+                    </t>
+
+                    <!-- Late & Unfinished -->
+                    <t t-if="state.mode === 'late_unfinished_purchases'">
+                        <t t-if="state.data.late_pos and state.data.late_pos.length">
+                            <div class="pal-section-header mb-2"><span class="text-danger">Late Purchases</span><span class="pal-badge pal-badge-danger ms-2" t-esc="state.data.late_pos.length"/></div>
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>PO Ref</th><th>Vendor</th><th>Buyer</th><th>Expected Date</th><th>Ordered</th><th>Received</th><th>Pending</th><th>Late Days</th><th>Amount</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.late_pos" t-as="row" t-key="row.id">
+                                                <tr class="late-row">
+                                                    <td><t t-esc="row.po_ref"/></td><td><t t-esc="row.vendor_name"/></td><td><t t-esc="row.buyer_name"/></td>
+                                                    <td><t t-esc="row.expected_date"/></td>
+                                                    <td class="text-end"><t t-esc="formatQty(row.ordered_qty)"/></td>
+                                                    <td class="text-end"><t t-esc="formatQty(row.received_qty)"/></td>
+                                                    <td class="text-end text-danger"><t t-esc="formatQty(row.pending_qty)"/></td>
+                                                    <td class="text-center text-danger fw-bold"><t t-esc="row.late_days"/></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.amount_total)"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="state.data.unfinished_pos and state.data.unfinished_pos.length">
+                            <div class="pal-section-header mb-2"><span>Unfinished Purchases</span></div>
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>PO Ref</th><th>Vendor</th><th>Buyer</th><th>State</th><th>Pending Qty</th><th>Unbilled Amt</th><th>Age (days)</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.unfinished_pos" t-as="row" t-key="row.id">
+                                                <tr>
+                                                    <td><t t-esc="row.po_ref"/></td><td><t t-esc="row.vendor_name"/></td><td><t t-esc="row.buyer_name"/></td>
+                                                    <td><span t-att-class="'pal-status-pill status-' + row.state"><t t-esc="row.state"/></span></td>
+                                                    <td class="text-end"><t t-esc="formatQty(row.pending_qty)"/></td>
+                                                    <td class="text-end text-warning"><t t-esc="formatCurrency(row.unbilled_amount)"/></td>
+                                                    <td t-att-class="'text-center' + (row.age_days > 30 ? ' text-danger' : '')"><t t-esc="row.age_days"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="(!state.data.late_pos or !state.data.late_pos.length) and (!state.data.unfinished_pos or !state.data.unfinished_pos.length)">
+                            <div class="pal-empty text-success"><i class="fa fa-check-circle fa-3x mb-2"/><p>All purchases are on track. No late or unfinished purchases found.</p></div>
+                        </t>
+                    </t>
+
+                    <!-- Price Trend -->
+                    <t t-if="state.mode === 'price_trend_analysis' and state.data.price_increase_alerts">
+                        <div class="pal-section-header mb-2"><span>Price Increase Alerts</span></div>
+                        <t t-if="state.data.price_increase_alerts.length">
+                            <div class="pal-table-section card mb-3">
+                                <div class="card-body p-0">
+                                    <table class="pal-table table table-sm table-hover mb-0">
+                                        <thead><tr><th>Product</th><th>Vendor</th><th>Previous Price</th><th>Latest Price</th><th>Change</th><th>Change %</th><th>Last Date</th></tr></thead>
+                                        <tbody>
+                                            <t t-foreach="state.data.price_increase_alerts" t-as="row" t-key="row.product_id + '_' + row.vendor_id">
+                                                <tr class="warning-row">
+                                                    <td><t t-esc="row.product_name"/></td><td><t t-esc="row.vendor_name"/></td>
+                                                    <td class="text-end"><t t-esc="formatCurrency(row.prev_price)"/></td>
+                                                    <td class="text-end text-danger"><t t-esc="formatCurrency(row.latest_price)"/></td>
+                                                    <td class="text-end text-danger">+<t t-esc="formatCurrency(row.price_change)"/></td>
+                                                    <td class="text-end text-danger fw-bold">+<t t-esc="(row.pct_change * 100).toFixed(1)"/>%</td>
+                                                    <td><t t-esc="row.last_purchase_date"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-else=""><div class="pal-empty"><i class="fa fa-check-circle fa-3x mb-2 text-success"/><p>No price increases above threshold.</p></div></t>
+                    </t>
+
+                </t>
+                <t t-else=""><div class="pal-loading"><div class="pal-spinner"/><p>Loading...</p></div></t>
+            </div>
+
+        </div>
+    </div>
+</t>
+
+<!-- ─── KPI CARD TEMPLATE ──────────────────────────────────── -->
+<t t-name="pal_kpi_card" owl="1">
+    <div t-att-class="'pal-kpi-card card h-100 border-0 shadow-sm pal-kpi-' + (kpi_css or '')">
+        <div class="card-body p-2">
+            <div class="pal-kpi-label text-muted small"><t t-esc="kpi_label"/></div>
+            <div class="pal-kpi-value fw-bold mt-1"><t t-esc="kpi_value"/></div>
+        </div>
+    </div>
+</t>
+
+<!-- ─── BAR CHART TEMPLATE ────────────────────────────────── -->
+<t t-name="pal_bar_chart" owl="1">
+    <div class="pal-bar-chart-wrap" t-att-style="'height:' + (chart_height or 180) + 'px; overflow:hidden;'">
+        <t t-set="max_val" t-value="Math.max(...chart_data.map(d => d[chart_value_key] || 0)) || 1"/>
+        <div class="d-flex align-items-end h-100 gap-1" style="padding-top:4px">
+            <t t-foreach="chart_data.slice(0, 24)" t-as="item" t-key="item_index">
+                <div class="d-flex flex-column align-items-center flex-fill" style="min-width:0">
+                    <div class="pal-bar-fill rounded-top"
+                         t-att-style="'height:' + Math.max(4, Math.round((item[chart_value_key] || 0) / max_val * (chart_height or 180) * 0.8)) + 'px; background:#1a6496; width:100%;'"
+                         t-att-title="item[chart_label_key] + ': ' + (item[chart_value_key] || 0).toLocaleString()"/>
+                    <div class="pal-bar-label text-muted" style="font-size:9px;white-space:nowrap;overflow:hidden;max-width:100%;text-align:center">
+                        <t t-esc="String(item[chart_label_key] || '').slice(-5)"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </div>
+</t>
+
+<!-- ─── DONUT CHART TEMPLATE ──────────────────────────────── -->
+<t t-name="pal_donut_chart" owl="1">
+    <t t-set="colors" t-value="['#1a6496','#27ae60','#f39c12','#e74c3c','#8e44ad','#16a085','#d35400','#2980b9']"/>
+    <t t-set="total_val" t-value="chart_data.reduce((s, d) => s + (d[chart_value_key] || 0), 0) || 1"/>
+    <div class="pal-donut-wrap d-flex align-items-center gap-3">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+            <t t-set="cx" t-value="60"/>
+            <t t-set="cy" t-value="60"/>
+            <t t-set="r" t-value="40"/>
+            <t t-set="stroke_w" t-value="20"/>
+            <t t-set="circ" t-value="2 * 3.14159 * r"/>
+            <t t-set="offset" t-value="0"/>
+            <t t-foreach="chart_data.slice(0, 8)" t-as="seg" t-key="seg_index">
+                <t t-set="seg_pct" t-value="(seg[chart_value_key] || 0) / total_val"/>
+                <t t-set="dash" t-value="seg_pct * circ"/>
+                <circle t-att-cx="cx" t-att-cy="cy" t-att-r="r"
+                        fill="none"
+                        t-att-stroke="colors[seg_index % colors.length]"
+                        t-att-stroke-width="stroke_w"
+                        t-att-stroke-dasharray="dash + ' ' + circ"
+                        t-att-stroke-dashoffset="-(offset * circ - circ / 4)"
+                        t-att-title="seg[chart_label_key] + ': ' + seg[chart_value_key]"/>
+                <t t-set="offset" t-value="offset + seg_pct"/>
+            </t>
+        </svg>
+        <div class="pal-donut-legend" style="font-size:11px">
+            <t t-foreach="chart_data.slice(0, 8)" t-as="seg" t-key="seg_index">
+                <div class="d-flex align-items-center mb-1">
+                    <div t-att-style="'width:10px;height:10px;border-radius:2px;background:' + colors[seg_index % colors.length] + ';margin-right:4px;flex-shrink:0'"/>
+                    <span class="text-truncate" style="max-width:100px"><t t-esc="seg[chart_label_key]"/></span>
+                    <span class="ms-1 fw-bold"><t t-esc="seg[chart_value_key]"/></span>
+                </div>
+            </t>
+        </div>
+    </div>
+</t>
+
+</templates>

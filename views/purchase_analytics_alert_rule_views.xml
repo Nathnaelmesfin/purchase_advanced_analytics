@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Purchase Analytics Alert Rule — Form View
+         ================================================================ -->
+    <record id="view_purchase_analytics_alert_rule_form" model="ir.ui.view">
+        <field name="name">purchase.analytics.alert.rule.form</field>
+        <field name="model">purchase.analytics.alert.rule</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Operational Alert Rule">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Late Receipt Alert"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Alert Configuration">
+                            <field name="alert_type"/>
+                            <field name="threshold_days"/>
+                            <field name="threshold_amount"/>
+                            <field name="threshold_percentage"/>
+                        </group>
+                        <group string="General">
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <separator string="Scope Filters"/>
+                    <p class="text-muted">
+                        Leave filters empty to apply this rule to all matching records.
+                        Specify one or more to narrow the alert scope.
+                    </p>
+                    <group>
+                        <group string="Vendor &amp; Buyer">
+                            <field name="vendor_id"/>
+                            <field name="buyer_id"/>
+                        </group>
+                        <group string="Product">
+                            <field name="product_id"/>
+                            <field name="product_category_id"/>
+                        </group>
+                    </group>
+                    <separator string="Description"/>
+                    <field name="description"
+                           placeholder="Describe the purpose or trigger conditions for this alert rule…"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Alert Rule — List View
+         ================================================================ -->
+    <record id="view_purchase_analytics_alert_rule_list" model="ir.ui.view">
+        <field name="name">purchase.analytics.alert.rule.list</field>
+        <field name="model">purchase.analytics.alert.rule</field>
+        <field name="arch" type="xml">
+            <list string="Purchase Operational Alert Rules"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="alert_type"/>
+                <field name="threshold_days"/>
+                <field name="threshold_amount"/>
+                <field name="threshold_percentage" string="Threshold (%)"/>
+                <field name="vendor_id"/>
+                <field name="buyer_id"/>
+                <field name="product_id"/>
+                <field name="product_category_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Alert Rule — Search View
+         ================================================================ -->
+    <record id="view_purchase_analytics_alert_rule_search" model="ir.ui.view">
+        <field name="name">purchase.analytics.alert.rule.search</field>
+        <field name="model">purchase.analytics.alert.rule</field>
+        <field name="arch" type="xml">
+            <search string="Search Alert Rules">
+                <field name="name" string="Rule Name"/>
+                <field name="alert_type" string="Alert Type"/>
+                <field name="vendor_id"/>
+                <field name="buyer_id"/>
+                <field name="product_id"/>
+                <field name="product_category_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="type_late_receipt" string="Late Receipt"
+                        domain="[('alert_type', '=', 'late_receipt')]"/>
+                <filter name="type_waiting_approval" string="Waiting Approval Too Long"
+                        domain="[('alert_type', '=', 'waiting_approval_too_long')]"/>
+                <filter name="type_price_increase" string="Price Increase"
+                        domain="[('alert_type', '=', 'price_increase')]"/>
+                <filter name="type_unbilled_po" string="Unbilled PO"
+                        domain="[('alert_type', '=', 'unbilled_po')]"/>
+                <filter name="type_unreceived_po" string="Unreceived PO"
+                        domain="[('alert_type', '=', 'unreceived_po')]"/>
+                <filter name="type_high_value_po" string="High Value PO"
+                        domain="[('alert_type', '=', 'high_value_po')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_alert_type" string="Alert Type"
+                            context="{'group_by': 'alert_type'}"/>
+                    <filter name="group_by_vendor" string="Vendor"
+                            context="{'group_by': 'vendor_id'}"/>
+                    <filter name="group_by_buyer" string="Buyer"
+                            context="{'group_by': 'buyer_id'}"/>
+                    <filter name="group_by_company" string="Company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Alert Rule — Window Action
+         ================================================================ -->
+    <record id="action_purchase_analytics_alert_rule" model="ir.actions.act_window">
+        <field name="name">Purchase Alert Rules</field>
+        <field name="res_model">purchase.analytics.alert.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_purchase_analytics_alert_rule_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Purchase Alert Rule
+            </p>
+            <p>
+                Configure operational alert rules to detect late receipts, waiting approvals,
+                price increases, unbilled POs, high-value orders, and more.
+            </p>
+        </field>
+    </record>
+
+</odoo>

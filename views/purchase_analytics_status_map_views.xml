@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Purchase Analytics Status Map — Form View
+         ================================================================ -->
+    <record id="view_purchase_analytics_status_map_form" model="ir.ui.view">
+        <field name="name">purchase.analytics.status.map.form</field>
+        <field name="model">purchase.analytics.status.map</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Analytics Status Map">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Draft RFQ Mapping"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Mapping">
+                            <field name="technical_state"
+                                   placeholder="e.g. draft, sent, purchase, cancel"/>
+                            <field name="business_status"/>
+                            <field name="applies_to"/>
+                        </group>
+                        <group string="General">
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <separator string="Description"/>
+                    <field name="description"
+                           placeholder="Describe when this mapping applies and any relevant context…"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Status Map — List View
+         ================================================================ -->
+    <record id="view_purchase_analytics_status_map_list" model="ir.ui.view">
+        <field name="name">purchase.analytics.status.map.list</field>
+        <field name="model">purchase.analytics.status.map</field>
+        <field name="arch" type="xml">
+            <list string="Purchase Analytics Status Maps"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="technical_state"/>
+                <field name="business_status"/>
+                <field name="applies_to"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Status Map — Search View
+         ================================================================ -->
+    <record id="view_purchase_analytics_status_map_search" model="ir.ui.view">
+        <field name="name">purchase.analytics.status.map.search</field>
+        <field name="model">purchase.analytics.status.map</field>
+        <field name="arch" type="xml">
+            <search string="Search Status Maps">
+                <field name="name" string="Name"/>
+                <field name="technical_state" string="Technical State"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="applies_to_rfq" string="RFQ"
+                        domain="[('applies_to', '=', 'rfq')]"/>
+                <filter name="applies_to_po" string="Purchase Order"
+                        domain="[('applies_to', '=', 'purchase_order')]"/>
+                <filter name="applies_to_receipt" string="Receipt"
+                        domain="[('applies_to', '=', 'receipt')]"/>
+                <filter name="applies_to_bill" string="Bill"
+                        domain="[('applies_to', '=', 'bill')]"/>
+                <filter name="applies_to_all" string="All"
+                        domain="[('applies_to', '=', 'all')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_applies_to" string="Applies To"
+                            context="{'group_by': 'applies_to'}"/>
+                    <filter name="group_by_business_status" string="Business Status"
+                            context="{'group_by': 'business_status'}"/>
+                    <filter name="group_by_company" string="Company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Status Map — Window Action
+         ================================================================ -->
+    <record id="action_purchase_analytics_status_map" model="ir.actions.act_window">
+        <field name="name">Purchase Analytics Status Maps</field>
+        <field name="res_model">purchase.analytics.status.map</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_purchase_analytics_status_map_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Status Map entry
+            </p>
+            <p>
+                Map Odoo technical states (e.g. <em>draft</em>, <em>purchase</em>, <em>cancel</em>)
+                to human-readable business statuses used in analytics reports and dashboards.
+            </p>
+        </field>
+    </record>
+
+</odoo>

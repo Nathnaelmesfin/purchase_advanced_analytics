@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         res.config.settings — Purchase Advanced Analytics Section
+         Extends the General Settings form with a dedicated block for all
+         module-specific configuration fields.
+    ================================================================ -->
+    <record id="res_config_settings_view_form_purchase_analytics"
+            model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.purchase.analytics</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.action_general_configuration"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+
+                <div class="app_settings_block"
+                     data-string="Purchase Advanced Analytics"
+                     data-key="purchase_advanced_analytics"
+                     string="Purchase Advanced Analytics"
+                     groups="purchase_advanced_analytics.group_purchase_analytics_manager">
+
+                    <!-- ================================================
+                         Section 1 — Dashboard &amp; General
+                         ================================================ -->
+                    <h2>Dashboard &amp; General</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Default Dashboard Date Range</span>
+                                <div class="text-muted">
+                                    The date range pre-selected when the live dashboard is opened.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="default_dashboard_date_range"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Auto-Refresh Interval (seconds)</span>
+                                <div class="text-muted">
+                                    How often the live dashboard refreshes automatically.
+                                    Minimum value is 30 seconds.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="auto_refresh_interval"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Default Report Timezone</span>
+                                <div class="text-muted">
+                                    Timezone used when generating PDF and Excel reports
+                                    (e.g. Africa/Addis_Ababa, UTC, Europe/Paris).
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="default_report_timezone"
+                                           placeholder="e.g. Africa/Addis_Ababa"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================
+                         Section 2 — Default Filter Presets
+                         ================================================ -->
+                    <h2>Default Filter Presets</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Default Vendors</span>
+                                <div class="text-muted">
+                                    Vendors pre-selected in the report wizard and dashboard filters.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="default_vendor_ids"
+                                           widget="many2many_tags"
+                                           domain="[('supplier_rank', '&gt;', 0)]"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Default Buyers</span>
+                                <div class="text-muted">
+                                    Buyers (internal users) pre-selected in the report wizard
+                                    and dashboard filters.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="default_buyer_ids" widget="many2many_tags"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Default Warehouses</span>
+                                <div class="text-muted">
+                                    Warehouses pre-selected in the report wizard and
+                                    dashboard filters.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="default_warehouse_ids" widget="many2many_tags"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================
+                         Section 3 — Alert &amp; Threshold Settings
+                         ================================================ -->
+                    <h2>Alert &amp; Threshold Settings</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Late Receipt Grace Days</span>
+                                <div class="text-muted">
+                                    Number of days after the expected delivery date before a
+                                    receipt is flagged as late. Set to 0 for no grace period.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="late_receipt_grace_days"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Waiting Approval Late After (days)</span>
+                                <div class="text-muted">
+                                    Number of days a purchase order can remain in
+                                    "Waiting Approval" before it is flagged as overdue.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="waiting_approval_late_days"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Pending RFQ Late After (days)</span>
+                                <div class="text-muted">
+                                    Number of days an RFQ can remain open before it is
+                                    flagged as a pending/stale RFQ.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="pending_rfq_late_days"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Price Increase Alert Threshold (%)</span>
+                                <div class="text-muted">
+                                    Percentage increase in unit price compared to the previous
+                                    purchase that triggers a price-increase alert.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="price_increase_threshold_percentage"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Unfinished Purchase Alert After (days)</span>
+                                <div class="text-muted">
+                                    Number of days after which a confirmed purchase order with
+                                    outstanding quantity is flagged as unfinished.
+                                </div>
+                                <div class="content-group mt8">
+                                    <field name="unfinished_purchase_days_threshold"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================
+                         Section 4 — Analytics Module Toggles
+                         ================================================ -->
+                    <h2>Analytics Features</h2>
+                    <div class="row mt16 o_settings_container">
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_purchase_request_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Purchase Request Analytics</span>
+                                <div class="text-muted">
+                                    Enable analysis and reporting on purchase requests
+                                    (native or inferred from PO source documents).
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_rfq_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">RFQ Analytics</span>
+                                <div class="text-muted">
+                                    Enable analysis and reporting on Request for Quotations,
+                                    including conversion rates and response times.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_purchase_order_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Purchase Order Analytics</span>
+                                <div class="text-muted">
+                                    Enable detailed analysis of confirmed purchase orders,
+                                    including value, quantity, and lifecycle metrics.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_vendor_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Vendor Analytics &amp; Scorecards</span>
+                                <div class="text-muted">
+                                    Enable vendor performance analysis and scorecard calculations
+                                    based on delivery, quality, price stability, and responsiveness.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_receipt_matching"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Receipt Matching</span>
+                                <div class="text-muted">
+                                    Enable matching and reconciliation analysis between
+                                    purchase orders and their stock receipts.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_bill_matching"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Bill Matching</span>
+                                <div class="text-muted">
+                                    Enable matching and reconciliation analysis between
+                                    purchase orders, receipts, and vendor bills.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_approval_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Approval Analytics</span>
+                                <div class="text-muted">
+                                    Enable analysis of purchase approval workflows, including
+                                    approval times and bottlenecks.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_price_trend_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Price Trend Analytics</span>
+                                <div class="text-muted">
+                                    Enable tracking of unit price changes over time per
+                                    product and vendor to identify pricing trends.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_target_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Target Analytics</span>
+                                <div class="text-muted">
+                                    Enable comparison of actual purchase amounts and quantities
+                                    against configured procurement targets.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_alert_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Alert Analytics</span>
+                                <div class="text-muted">
+                                    Enable operational alert detection and reporting based
+                                    on configured alert rules.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="enable_buyer_analytics"
+                                       widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Buyer Analytics</span>
+                                <div class="text-muted">
+                                    Enable performance analysis per buyer, including order
+                                    volumes, approval times, and vendor relationships.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- end app_settings_block -->
+                </div>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
