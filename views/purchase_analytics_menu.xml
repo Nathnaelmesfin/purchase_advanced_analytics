@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Purchase Advanced Analytics — Menu Structure
+         Placed under the existing Purchase root menu so all items appear
+         as a top-level "Analytics" section inside the Purchase app.
+    ================================================================ -->
+
+    <!-- ── Top-level "Analytics" menu under Purchase ─────────────────── -->
+    <menuitem
+        id="menu_purchase_analytics_root"
+        name="Analytics"
+        parent="purchase.menu_purchase_root"
+        sequence="99"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 1. Live Dashboard ─────────────────────────────────────────── -->
+    <record id="action_purchase_analytics_live_dashboard" model="ir.actions.client">
+        <field name="name">Live Dashboard</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "live_dashboard"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_live_dashboard"
+        name="Live Dashboard"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_live_dashboard"
+        sequence="10"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 2. Purchase Request Analysis ─────────────────────────────── -->
+    <record id="action_purchase_analytics_purchase_request_analysis" model="ir.actions.client">
+        <field name="name">Purchase Request Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "purchase_request_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_purchase_request_analysis"
+        name="Purchase Request Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_purchase_request_analysis"
+        sequence="20"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 3. RFQ Analysis ───────────────────────────────────────────── -->
+    <record id="action_purchase_analytics_rfq_analysis" model="ir.actions.client">
+        <field name="name">RFQ Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "rfq_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_rfq_analysis"
+        name="RFQ Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_rfq_analysis"
+        sequence="30"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 4. Purchase Order Analysis ───────────────────────────────── -->
+    <record id="action_purchase_analytics_purchase_order_analysis" model="ir.actions.client">
+        <field name="name">Purchase Order Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "purchase_order_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_purchase_order_analysis"
+        name="Purchase Order Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_purchase_order_analysis"
+        sequence="40"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 5. Vendor Analysis ────────────────────────────────────────── -->
+    <record id="action_purchase_analytics_vendor_analysis" model="ir.actions.client">
+        <field name="name">Vendor Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "vendor_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_vendor_analysis"
+        name="Vendor Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_vendor_analysis"
+        sequence="50"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 6. Product Purchase Analysis ─────────────────────────────── -->
+    <record id="action_purchase_analytics_product_purchase_analysis" model="ir.actions.client">
+        <field name="name">Product Purchase Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "product_purchase_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_product_purchase_analysis"
+        name="Product Purchase Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_product_purchase_analysis"
+        sequence="60"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 7. Receipt Matching ───────────────────────────────────────── -->
+    <record id="action_purchase_analytics_receipt_matching" model="ir.actions.client">
+        <field name="name">Receipt Matching</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "receipt_matching"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_receipt_matching"
+        name="Receipt Matching"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_receipt_matching"
+        sequence="70"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 8. Bill Matching ──────────────────────────────────────────── -->
+    <record id="action_purchase_analytics_bill_matching" model="ir.actions.client">
+        <field name="name">Bill Matching</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "bill_matching"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_bill_matching"
+        name="Bill Matching"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_bill_matching"
+        sequence="80"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 9. Approval Analysis ─────────────────────────────────────── -->
+    <record id="action_purchase_analytics_approval_analysis" model="ir.actions.client">
+        <field name="name">Approval Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "approval_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_approval_analysis"
+        name="Approval Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_approval_analysis"
+        sequence="90"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 10. Late & Unfinished Purchases ──────────────────────────── -->
+    <record id="action_purchase_analytics_late_unfinished_purchases" model="ir.actions.client">
+        <field name="name">Late &amp; Unfinished Purchases</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "late_unfinished_purchases"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_late_unfinished_purchases"
+        name="Late &amp; Unfinished Purchases"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_late_unfinished_purchases"
+        sequence="100"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 11. Price Trend Analysis ─────────────────────────────────── -->
+    <record id="action_purchase_analytics_price_trend_analysis" model="ir.actions.client">
+        <field name="name">Price Trend Analysis</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "price_trend_analysis"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_price_trend_analysis"
+        name="Price Trend Analysis"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_price_trend_analysis"
+        sequence="110"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 12. Reports ───────────────────────────────────────────────── -->
+    <!--
+        The wizard action (action_purchase_analytics_report_wizard) is
+        defined in views/purchase_analytics_report_wizard_views.xml which
+        is loaded before this file.  We reference it directly here.
+    -->
+    <menuitem
+        id="menu_purchase_analytics_reports"
+        name="Reports"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_report_wizard"
+        sequence="120"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 13. Vendor Scorecards ─────────────────────────────────────── -->
+    <record id="action_purchase_analytics_vendor_scorecards" model="ir.actions.client">
+        <field name="name">Vendor Scorecards</field>
+        <field name="tag">purchase_analytics_dashboard</field>
+        <field name="context">{"mode": "vendor_scorecards"}</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_vendor_scorecards"
+        name="Vendor Scorecards"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_vendor_scorecards"
+        sequence="130"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 14. Purchase Rules / Targets ─────────────────────────────── -->
+    <!--
+        action_purchase_analytics_target is defined in
+        views/purchase_analytics_target_views.xml (loaded before this file).
+    -->
+    <menuitem
+        id="menu_purchase_analytics_targets"
+        name="Purchase Rules / Targets"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_target"
+        sequence="140"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 15. Alert Rules ───────────────────────────────────────────── -->
+    <!--
+        action_purchase_analytics_alert_rule is defined in
+        views/purchase_analytics_alert_rule_views.xml (loaded before this file).
+    -->
+    <menuitem
+        id="menu_purchase_analytics_alert_rules"
+        name="Alert Rules"
+        parent="menu_purchase_analytics_root"
+        action="action_purchase_analytics_alert_rule"
+        sequence="150"
+        groups="purchase_advanced_analytics.group_purchase_analytics_user"
+    />
+
+    <!-- ── 16. Configuration (manager-only submenu) ──────────────────── -->
+    <menuitem
+        id="menu_purchase_analytics_configuration"
+        name="Configuration"
+        parent="menu_purchase_analytics_root"
+        sequence="160"
+        groups="purchase_advanced_analytics.group_purchase_analytics_manager"
+    />
+
+    <!-- 16a. Status Mappings -->
+    <!--
+        action_purchase_analytics_status_map is defined in
+        views/purchase_analytics_status_map_views.xml (loaded before this file).
+    -->
+    <menuitem
+        id="menu_purchase_analytics_status_mappings"
+        name="Status Mappings"
+        parent="menu_purchase_analytics_configuration"
+        action="action_purchase_analytics_status_map"
+        sequence="10"
+        groups="purchase_advanced_analytics.group_purchase_analytics_manager"
+    />
+
+    <!-- 16b. Vendor Score Rules -->
+    <!--
+        action_purchase_analytics_vendor_rule is defined in
+        views/purchase_analytics_vendor_rule_views.xml (loaded before this file).
+    -->
+    <menuitem
+        id="menu_purchase_analytics_vendor_score_rules"
+        name="Vendor Score Rules"
+        parent="menu_purchase_analytics_configuration"
+        action="action_purchase_analytics_vendor_rule"
+        sequence="20"
+        groups="purchase_advanced_analytics.group_purchase_analytics_manager"
+    />
+
+    <!-- 16c. Settings — opens General Settings filtered to this module -->
+    <record id="action_purchase_analytics_settings" model="ir.actions.act_window">
+        <field name="name">Purchase Analytics Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{"module" : "purchase_advanced_analytics"}</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_analytics_settings"
+        name="Settings"
+        parent="menu_purchase_analytics_configuration"
+        action="action_purchase_analytics_settings"
+        sequence="30"
+        groups="purchase_advanced_analytics.group_purchase_analytics_manager"
+    />
+
+</odoo>

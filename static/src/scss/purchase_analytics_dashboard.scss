@@ -1,0 +1,1186 @@
+// ============================================================
+// Purchase Advanced Analytics Dashboard - SCSS Styles
+// Odoo 17 Module
+// ============================================================
+
+// ------------------------------------------------------------
+// Variables
+// ------------------------------------------------------------
+$pal-primary:        #1a6496;
+$pal-secondary:      #2980b9;
+$pal-success:        #27ae60;
+$pal-warning:        #f39c12;
+$pal-danger:         #e74c3c;
+$pal-info:           #2980b9;
+
+$pal-light-bg:       #f8f9fa;
+$pal-border:         #dee2e6;
+$pal-text:           #333333;
+$pal-text-muted:     #6c757d;
+$pal-white:          #ffffff;
+
+$pal-card-shadow:    0 2px 8px rgba(0, 0, 0, 0.08);
+$pal-card-radius:    6px;
+$pal-transition:     all 0.2s ease-in-out;
+
+$pal-header-bg:      #1a6496;
+$pal-header-text:    #ffffff;
+
+$pal-stripe-bg:      rgba(0, 0, 0, 0.02);
+$pal-hover-bg:       rgba(26, 100, 150, 0.06);
+
+$pal-late-bg:        rgba(231, 76, 60, 0.08);
+$pal-warning-bg:     rgba(243, 156, 18, 0.08);
+$pal-success-bg:     rgba(39, 174, 96, 0.08);
+
+
+// ============================================================
+// 1. Main Dashboard Container
+// ============================================================
+.pal-dashboard {
+    padding: 16px 20px;
+    background-color: $pal-light-bg;
+    min-height: 100vh;
+    font-family: inherit;
+    color: $pal-text;
+
+    * {
+        box-sizing: border-box;
+    }
+}
+
+
+// ============================================================
+// 2. Top Filter Panel
+// ============================================================
+.pal-filter-panel {
+    background: $pal-white;
+    border: 1px solid $pal-border;
+    border-radius: $pal-card-radius;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    box-shadow: $pal-card-shadow;
+
+    .pal-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 12px;
+
+        & + .pal-filter-row {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid $pal-border;
+        }
+    }
+
+    .pal-filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 140px;
+        flex: 1 1 140px;
+
+        select,
+        input[type="text"],
+        input[type="date"],
+        input[type="number"] {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid $pal-border;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: $pal-text;
+            background-color: $pal-white;
+            transition: $pal-transition;
+
+            &:focus {
+                outline: none;
+                border-color: $pal-secondary;
+                box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.15);
+            }
+        }
+    }
+
+    .pal-filter-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $pal-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 2px;
+    }
+
+    .pal-filter-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+}
+
+
+// ============================================================
+// 3. Tab Navigation
+// ============================================================
+.pal-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    background: $pal-white;
+    border: 1px solid $pal-border;
+    border-radius: $pal-card-radius;
+    padding: 6px;
+    margin-bottom: 18px;
+    box-shadow: $pal-card-shadow;
+
+    .pal-tab {
+        padding: 8px 18px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $pal-text-muted;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        transition: $pal-transition;
+        user-select: none;
+        white-space: nowrap;
+
+        &:hover {
+            color: $pal-primary;
+            background-color: rgba(26, 100, 150, 0.07);
+        }
+
+        &.active {
+            color: $pal-white;
+            background-color: $pal-primary;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(26, 100, 150, 0.3);
+
+            &:hover {
+                background-color: darken($pal-primary, 5%);
+                color: $pal-white;
+            }
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 100, 150, 0.25);
+        }
+    }
+}
+
+
+// ============================================================
+// 4 & 5. KPI Grid and Cards
+// ============================================================
+.pal-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.pal-kpi-card {
+    background: $pal-white;
+    border: 1px solid $pal-border;
+    border-left: 4px solid $pal-primary;
+    border-radius: $pal-card-radius;
+    padding: 16px 18px;
+    box-shadow: $pal-card-shadow;
+    transition: $pal-transition;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        transform: translateY(-1px);
+    }
+
+    // Accent variants
+    &.info {
+        border-left-color: $pal-info;
+
+        .pal-kpi-value { color: $pal-info; }
+    }
+
+    &.success {
+        border-left-color: $pal-success;
+
+        .pal-kpi-value { color: $pal-success; }
+    }
+
+    &.warning {
+        border-left-color: $pal-warning;
+        background: linear-gradient(135deg, $pal-white 85%, rgba(243, 156, 18, 0.06));
+
+        .pal-kpi-value { color: darken($pal-warning, 8%); }
+    }
+
+    &.danger {
+        border-left-color: $pal-danger;
+        background: linear-gradient(135deg, $pal-white 85%, rgba(231, 76, 60, 0.06));
+
+        .pal-kpi-value { color: $pal-danger; }
+    }
+
+    .pal-kpi-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $pal-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .pal-kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $pal-primary;
+        line-height: 1.1;
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+    }
+
+    .pal-kpi-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: $pal-text-muted;
+
+        &.up {
+            color: $pal-success;
+
+            &::before { content: "▲ "; }
+        }
+
+        &.down {
+            color: $pal-danger;
+
+            &::before { content: "▼ "; }
+        }
+
+        &.neutral {
+            color: $pal-text-muted;
+
+            &::before { content: "— "; }
+        }
+    }
+
+    .pal-kpi-sub {
+        font-size: 0.75rem;
+        color: $pal-text-muted;
+        margin-top: 4px;
+    }
+}
+
+
+// ============================================================
+// 6 & 7. Chart Section and Row
+// ============================================================
+.pal-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+
+    .pal-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: $pal-primary;
+        margin: 0;
+        padding: 0;
+        border-left: 3px solid $pal-secondary;
+        padding-left: 10px;
+    }
+
+    .pal-section-action {
+        font-size: 0.8rem;
+        color: $pal-secondary;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: $pal-transition;
+        white-space: nowrap;
+
+        &:hover {
+            color: $pal-primary;
+            text-decoration: underline;
+        }
+    }
+}
+
+.pal-chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+
+    &.two-col {
+        .pal-chart-section {
+            flex: 1 1 calc(50% - 8px);
+            min-width: 280px;
+        }
+    }
+
+    &.three-col {
+        .pal-chart-section {
+            flex: 1 1 calc(33.333% - 11px);
+            min-width: 220px;
+        }
+    }
+}
+
+.pal-chart-section {
+    background: $pal-white;
+    border: 1px solid $pal-border;
+    border-radius: $pal-card-radius;
+    padding: 16px 18px;
+    box-shadow: $pal-card-shadow;
+    flex: 1 1 100%;
+    min-width: 0;
+
+    .pal-chart-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: $pal-text;
+        margin: 0 0 14px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid $pal-border;
+    }
+
+    .pal-chart-subtitle {
+        font-size: 0.75rem;
+        color: $pal-text-muted;
+        margin-top: -10px;
+        margin-bottom: 12px;
+    }
+
+    .pal-chart-container {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    }
+}
+
+
+// ============================================================
+// 8. SVG Chart Styles
+// ============================================================
+
+// Bar Chart
+.pal-bar-chart {
+    .bar {
+        fill: $pal-primary;
+        transition: fill 0.15s ease;
+        rx: 2px;
+
+        &:hover { fill: $pal-secondary; }
+
+        &.bar-success { fill: $pal-success; }
+        &.bar-warning { fill: $pal-warning; }
+        &.bar-danger  { fill: $pal-danger; }
+        &.bar-info    { fill: $pal-info; }
+    }
+
+    .axis line,
+    .axis path {
+        stroke: $pal-border;
+    }
+
+    .axis text {
+        fill: $pal-text-muted;
+        font-size: 11px;
+    }
+
+    .grid line {
+        stroke: $pal-border;
+        stroke-dasharray: 3 3;
+        opacity: 0.6;
+    }
+
+    .bar-label {
+        fill: $pal-text-muted;
+        font-size: 10px;
+        text-anchor: middle;
+    }
+
+    .chart-tooltip {
+        fill: $pal-white;
+        stroke: $pal-border;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+}
+
+// Line Chart
+.pal-line-chart {
+    .line {
+        fill: none;
+        stroke: $pal-primary;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+
+        &.line-secondary { stroke: $pal-secondary; }
+        &.line-success    { stroke: $pal-success; }
+        &.line-warning    { stroke: $pal-warning; }
+        &.line-danger     { stroke: $pal-danger; }
+    }
+
+    .area {
+        fill: $pal-primary;
+        opacity: 0.08;
+
+        &.area-secondary { fill: $pal-secondary; }
+        &.area-success   { fill: $pal-success; }
+    }
+
+    .dot {
+        fill: $pal-white;
+        stroke: $pal-primary;
+        stroke-width: 2;
+        r: 4px;
+        transition: r 0.1s ease;
+
+        &:hover { r: 6px; }
+    }
+
+    .axis line,
+    .axis path { stroke: $pal-border; }
+    .axis text { fill: $pal-text-muted; font-size: 11px; }
+
+    .grid line {
+        stroke: $pal-border;
+        stroke-dasharray: 3 3;
+        opacity: 0.5;
+    }
+
+    .reference-line {
+        stroke: $pal-warning;
+        stroke-width: 1.5;
+        stroke-dasharray: 6 3;
+    }
+}
+
+// Donut / Pie Chart
+.pal-donut-chart {
+    .slice {
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        transform-origin: center;
+
+        &:hover { opacity: 0.85; transform: scale(1.03); }
+    }
+
+    .donut-center-text {
+        dominant-baseline: middle;
+        text-anchor: middle;
+    }
+
+    .donut-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        fill: $pal-primary;
+    }
+
+    .donut-label {
+        font-size: 0.7rem;
+        fill: $pal-text-muted;
+    }
+
+    .legend-item text {
+        fill: $pal-text;
+        font-size: 11px;
+    }
+
+    .legend-dot {
+        rx: 3px;
+    }
+}
+
+
+// ============================================================
+// 9. Data Table
+// ============================================================
+.pal-table-section {
+    background: $pal-white;
+    border: 1px solid $pal-border;
+    border-radius: $pal-card-radius;
+    padding: 16px 18px;
+    box-shadow: $pal-card-shadow;
+    margin-bottom: 22px;
+    overflow-x: auto;
+}
+
+.pal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    color: $pal-text;
+
+    th {
+        background-color: $pal-header-bg;
+        color: $pal-header-text;
+        padding: 10px 14px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border: none;
+        white-space: nowrap;
+        user-select: none;
+
+        &.sortable {
+            cursor: pointer;
+            position: relative;
+
+            &::after {
+                content: " ⇅";
+                opacity: 0.5;
+                font-size: 0.65rem;
+            }
+
+            &.asc::after  { content: " ↑"; opacity: 1; }
+            &.desc::after { content: " ↓"; opacity: 1; }
+
+            &:hover { background-color: darken($pal-header-bg, 6%); }
+        }
+
+        &:first-child { border-radius: 4px 0 0 0; }
+        &:last-child  { border-radius: 0 4px 0 0; }
+    }
+
+    td {
+        padding: 9px 14px;
+        border-bottom: 1px solid $pal-border;
+        vertical-align: middle;
+        line-height: 1.4;
+
+        &.numeric {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        &.center { text-align: center; }
+    }
+
+    tbody {
+        tr {
+            transition: background-color 0.12s ease;
+
+            &:nth-child(even) { background-color: $pal-stripe-bg; }
+
+            &:hover { background-color: $pal-hover-bg; }
+
+            &:last-child td { border-bottom: none; }
+
+            // Row state variants
+            &.late-row {
+                background-color: $pal-late-bg !important;
+
+                td { color: darken($pal-danger, 5%); }
+
+                &:hover { background-color: darken($pal-late-bg, 3%) !important; }
+            }
+
+            &.warning-row {
+                background-color: $pal-warning-bg !important;
+
+                td { color: darken($pal-warning, 15%); }
+
+                &:hover { background-color: darken($pal-warning-bg, 3%) !important; }
+            }
+
+            &.success-row {
+                background-color: $pal-success-bg !important;
+
+                td { color: darken($pal-success, 10%); }
+
+                &:hover { background-color: darken($pal-success-bg, 3%) !important; }
+            }
+        }
+    }
+
+    tfoot {
+        tr {
+            background-color: lighten($pal-primary, 60%);
+
+            td {
+                font-weight: 700;
+                font-size: 0.875rem;
+                border-top: 2px solid $pal-primary;
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+
+// ============================================================
+// 10. Loading State
+// ============================================================
+.pal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    color: $pal-text-muted;
+    gap: 14px;
+
+    .pal-spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid $pal-border;
+        border-top-color: $pal-primary;
+        border-radius: 50%;
+        animation: pal-spin 0.75s linear infinite;
+    }
+
+    .pal-loading-text {
+        font-size: 0.875rem;
+        color: $pal-text-muted;
+    }
+}
+
+@keyframes pal-spin {
+    to { transform: rotate(360deg); }
+}
+
+
+// ============================================================
+// 11. Empty State
+// ============================================================
+.pal-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 24px;
+    text-align: center;
+    color: $pal-text-muted;
+    gap: 10px;
+
+    .pal-empty-icon {
+        font-size: 2.5rem;
+        opacity: 0.4;
+        margin-bottom: 4px;
+    }
+
+    .pal-empty-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: lighten($pal-text, 20%);
+    }
+
+    .pal-empty-message {
+        font-size: 0.875rem;
+        color: $pal-text-muted;
+        max-width: 360px;
+        line-height: 1.5;
+    }
+}
+
+
+// ============================================================
+// 12. Error State
+// ============================================================
+.pal-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    background-color: rgba(231, 76, 60, 0.07);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-left: 4px solid $pal-danger;
+    border-radius: $pal-card-radius;
+    margin-bottom: 16px;
+    color: darken($pal-danger, 10%);
+
+    .pal-error-icon {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .pal-error-body {
+        flex: 1;
+    }
+
+    .pal-error-title {
+        font-weight: 700;
+        font-size: 0.875rem;
+        margin-bottom: 2px;
+    }
+
+    .pal-error-message {
+        font-size: 0.82rem;
+        opacity: 0.85;
+        line-height: 1.4;
+    }
+
+    .pal-error-retry {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: $pal-danger;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: underline;
+
+        &:hover { color: darken($pal-danger, 12%); }
+    }
+}
+
+
+// ============================================================
+// 13. Alert Badge
+// ============================================================
+.pal-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    white-space: nowrap;
+
+    &.pal-badge-danger {
+        background-color: rgba(231, 76, 60, 0.12);
+        color: darken($pal-danger, 5%);
+        border: 1px solid rgba(231, 76, 60, 0.25);
+    }
+
+    &.pal-badge-warning {
+        background-color: rgba(243, 156, 18, 0.12);
+        color: darken($pal-warning, 15%);
+        border: 1px solid rgba(243, 156, 18, 0.25);
+    }
+
+    &.pal-badge-success {
+        background-color: rgba(39, 174, 96, 0.12);
+        color: darken($pal-success, 10%);
+        border: 1px solid rgba(39, 174, 96, 0.25);
+    }
+
+    &.pal-badge-info {
+        background-color: rgba(41, 128, 185, 0.12);
+        color: darken($pal-info, 10%);
+        border: 1px solid rgba(41, 128, 185, 0.25);
+    }
+
+    &.pal-badge-primary {
+        background-color: rgba(26, 100, 150, 0.12);
+        color: $pal-primary;
+        border: 1px solid rgba(26, 100, 150, 0.25);
+    }
+
+    &.pal-badge-neutral {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: $pal-text-muted;
+        border: 1px solid $pal-border;
+    }
+}
+
+
+// ============================================================
+// 14. Status Pill
+// ============================================================
+.pal-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    &.draft      { background: #f0f0f0; color: #888; &::before { background: #aaa; } }
+    &.confirmed  { background: rgba(41,128,185,0.1); color: darken($pal-info,12%); &::before { background: $pal-info; } }
+    &.approved   { background: rgba(39,174,96,0.1); color: darken($pal-success,10%); &::before { background: $pal-success; } }
+    &.done       { background: rgba(26,100,150,0.1); color: $pal-primary; &::before { background: $pal-primary; } }
+    &.pending    { background: rgba(243,156,18,0.1); color: darken($pal-warning,15%); &::before { background: $pal-warning; } }
+    &.cancelled  { background: rgba(231,76,60,0.08); color: $pal-danger; &::before { background: $pal-danger; } }
+    &.late       { background: rgba(231,76,60,0.12); color: darken($pal-danger,8%); &::before { background: $pal-danger; animation: pal-blink 1.2s ease infinite; } }
+    &.on-time    { background: rgba(39,174,96,0.1); color: darken($pal-success,10%); &::before { background: $pal-success; } }
+}
+
+@keyframes pal-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+
+// ============================================================
+// 15. Section Header (already partially defined above, extended)
+// ============================================================
+// (See .pal-section-header under Chart Section)
+
+
+// ============================================================
+// 16. Action Link
+// ============================================================
+.pal-action-link {
+    color: $pal-secondary;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    transition: $pal-transition;
+
+    &:hover {
+        color: $pal-primary;
+        text-decoration: underline;
+    }
+
+    &:active { color: darken($pal-primary, 8%); }
+
+    // Row-level clickable link
+    .pal-table & {
+        display: block;
+
+        &:hover { background: none; }
+    }
+}
+
+
+// ============================================================
+// 17. Refresh Button
+// ============================================================
+.pal-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background-color: $pal-white;
+    border: 1px solid $pal-border;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $pal-text-muted;
+    cursor: pointer;
+    transition: $pal-transition;
+    white-space: nowrap;
+
+    .pal-refresh-icon {
+        font-size: 0.85rem;
+        transition: transform 0.4s ease;
+        display: inline-block;
+    }
+
+    &:hover {
+        border-color: $pal-secondary;
+        color: $pal-secondary;
+        background-color: rgba(41, 128, 185, 0.04);
+
+        .pal-refresh-icon { transform: rotate(180deg); }
+    }
+
+    &.spinning .pal-refresh-icon {
+        animation: pal-spin 0.75s linear infinite;
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+    }
+}
+
+
+// ============================================================
+// 18. Report Generation Actions
+// ============================================================
+.pal-report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: $pal-white;
+    border: 1px solid $pal-border;
+    border-radius: $pal-card-radius;
+    box-shadow: $pal-card-shadow;
+    margin-bottom: 18px;
+
+    .pal-report-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 16px;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: $pal-transition;
+        text-decoration: none;
+
+        &.primary {
+            background-color: $pal-primary;
+            color: $pal-white;
+            border-color: $pal-primary;
+
+            &:hover { background-color: darken($pal-primary, 7%); }
+        }
+
+        &.secondary {
+            background-color: $pal-white;
+            color: $pal-primary;
+            border-color: $pal-primary;
+
+            &:hover { background-color: rgba(26, 100, 150, 0.06); }
+        }
+
+        &.export {
+            background-color: darken($pal-success, 2%);
+            color: $pal-white;
+            border-color: darken($pal-success, 2%);
+
+            &:hover { background-color: darken($pal-success, 10%); }
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 100, 150, 0.2);
+        }
+
+        &:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    }
+
+    .pal-report-separator {
+        width: 1px;
+        height: 24px;
+        background: $pal-border;
+        flex-shrink: 0;
+    }
+
+    .pal-report-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: $pal-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+}
+
+
+// ============================================================
+// 19. Score Bar
+// ============================================================
+.pal-score-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+
+    .pal-score-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.78rem;
+        color: $pal-text-muted;
+    }
+
+    .pal-score-label { font-weight: 500; }
+
+    .pal-score-value {
+        font-weight: 700;
+        color: $pal-primary;
+    }
+
+    .pal-score-track {
+        width: 100%;
+        height: 8px;
+        background: $pal-border;
+        border-radius: 100px;
+        overflow: hidden;
+    }
+
+    .pal-score-fill {
+        height: 100%;
+        border-radius: 100px;
+        background: linear-gradient(90deg, $pal-secondary, $pal-primary);
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 2px;
+
+        &.good    { background: linear-gradient(90deg, lighten($pal-success, 10%), $pal-success); }
+        &.average { background: linear-gradient(90deg, lighten($pal-warning, 5%), $pal-warning); }
+        &.poor    { background: linear-gradient(90deg, lighten($pal-danger, 10%), $pal-danger); }
+    }
+}
+
+
+// ============================================================
+// 20. Responsive: ≤ 768px
+// ============================================================
+@media (max-width: 768px) {
+
+    .pal-dashboard {
+        padding: 10px 12px;
+    }
+
+    .pal-filter-panel {
+        padding: 12px;
+
+        .pal-filter-row {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pal-filter-group {
+            flex: 1 1 100%;
+            min-width: 0;
+        }
+
+        .pal-filter-actions {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+    }
+
+    .pal-tabs {
+        gap: 0;
+        padding: 4px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+
+        .pal-tab {
+            padding: 7px 12px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+    }
+
+    .pal-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .pal-kpi-card {
+        .pal-kpi-value { font-size: 1.5rem; }
+    }
+
+    .pal-chart-row {
+        flex-direction: column;
+        gap: 12px;
+
+        &.two-col .pal-chart-section,
+        &.three-col .pal-chart-section {
+            flex: 1 1 100%;
+            min-width: 0;
+        }
+    }
+
+    .pal-chart-section {
+        padding: 12px 14px;
+    }
+
+    .pal-table-section {
+        padding: 12px;
+    }
+
+    .pal-table {
+        font-size: 0.8rem;
+
+        th, td {
+            padding: 8px 10px;
+        }
+
+        // Horizontal scroll handled by overflow-x on parent
+    }
+
+    .pal-report-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        .pal-report-btn {
+            justify-content: center;
+        }
+
+        .pal-report-separator {
+            width: 100%;
+            height: 1px;
+        }
+    }
+
+    .pal-section-header {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .pal-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pal-kpi-card {
+        .pal-kpi-value { font-size: 1.75rem; }
+    }
+}
+
+
+// ============================================================
+// Utility / Helper Classes
+// ============================================================
+.pal-mt-0  { margin-top: 0 !important; }
+.pal-mb-0  { margin-bottom: 0 !important; }
+.pal-mb-8  { margin-bottom: 8px !important; }
+.pal-mb-16 { margin-bottom: 16px !important; }
+.pal-mb-22 { margin-bottom: 22px !important; }
+
+.pal-text-right  { text-align: right; }
+.pal-text-center { text-align: center; }
+.pal-text-muted  { color: $pal-text-muted !important; }
+.pal-text-danger { color: $pal-danger !important; }
+.pal-text-success { color: $pal-success !important; }
+.pal-text-warning { color: darken($pal-warning, 10%) !important; }
+.pal-text-primary { color: $pal-primary !important; }
+
+.pal-font-bold { font-weight: 700 !important; }
+.pal-font-mono {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85em;
+}
+
+.pal-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pal-d-flex          { display: flex; }
+.pal-align-center    { align-items: center; }
+.pal-justify-between { justify-content: space-between; }
+.pal-gap-8           { gap: 8px; }
+.pal-gap-12          { gap: 12px; }
+
+.pal-w-full { width: 100%; }

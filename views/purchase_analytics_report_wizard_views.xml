@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Purchase Analytics Report Wizard — Form View
+         ================================================================ -->
+    <record id="view_purchase_analytics_report_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.analytics.report.wizard.form</field>
+        <field name="model">purchase.analytics.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Purchase Analytics Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Generate Purchase Analytics Report</h1>
+                    </div>
+                    <notebook>
+
+                        <!-- ============================================
+                             Tab 1 — Date Filters
+                             ============================================ -->
+                        <page string="Date Filters" name="tab_date_filters">
+                            <group string="General Date Range">
+                                <group>
+                                    <field name="date_start" string="Date From"/>
+                                    <field name="date_end" string="Date To"/>
+                                </group>
+                            </group>
+                            <group string="Order Date">
+                                <group>
+                                    <field name="order_date_from"/>
+                                    <field name="order_date_to"/>
+                                </group>
+                            </group>
+                            <group string="Expected Delivery Date">
+                                <group>
+                                    <field name="expected_date_from"/>
+                                    <field name="expected_date_to"/>
+                                </group>
+                            </group>
+                            <group string="Confirmation Date">
+                                <group>
+                                    <field name="confirmation_date_from"/>
+                                    <field name="confirmation_date_to"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ============================================
+                             Tab 2 — Participants
+                             ============================================ -->
+                        <page string="Participants" name="tab_participants">
+                            <group>
+                                <group string="Vendors &amp; Buyers">
+                                    <field name="vendor_ids" widget="many2many_tags"/>
+                                    <field name="buyer_ids" widget="many2many_tags"/>
+                                </group>
+                                <group string="Approvers &amp; Requesters">
+                                    <field name="requested_by_ids" widget="many2many_tags"/>
+                                    <field name="approved_by_ids" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Warehouses">
+                                    <field name="warehouse_ids" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ============================================
+                             Tab 3 — Products
+                             ============================================ -->
+                        <page string="Products" name="tab_products">
+                            <group>
+                                <group string="Product Filters">
+                                    <field name="product_category_ids" widget="many2many_tags"/>
+                                    <field name="product_ids" widget="many2many_tags"/>
+                                </group>
+                                <group string="Organisation">
+                                    <field name="department"/>
+                                    <field name="branch_label" string="Branch"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ============================================
+                             Tab 4 — Status Filters
+                             ============================================ -->
+                        <page string="Status Filters" name="tab_status_filters">
+                            <group>
+                                <group string="Document Status">
+                                    <field name="purchase_state"/>
+                                    <field name="receipt_status"/>
+                                </group>
+                                <group string="Financial Status">
+                                    <field name="bill_status"/>
+                                    <field name="payment_status"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ============================================
+                             Tab 5 — Report Options
+                             ============================================ -->
+                        <page string="Report Options" name="tab_report_options">
+                            <group>
+                                <group string="Report Configuration">
+                                    <field name="report_type"/>
+                                    <field name="group_by"/>
+                                    <field name="report_basis"/>
+                                    <field name="export_format"/>
+                                </group>
+                                <group string="Include Details">
+                                    <field name="include_raw_orders" widget="boolean_toggle"/>
+                                    <field name="include_raw_lines" widget="boolean_toggle"/>
+                                    <field name="include_receipts" widget="boolean_toggle"/>
+                                    <field name="include_bills" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ============================================
+                             Tab 6 — Quick Filters
+                             ============================================ -->
+                        <page string="Quick Filters" name="tab_quick_filters">
+                            <p class="text-muted">
+                                Enable one or more quick filters to limit the report to records
+                                matching the selected conditions. Multiple filters are combined
+                                with AND logic.
+                            </p>
+                            <group>
+                                <group string="Approval &amp; Timing">
+                                    <field name="only_waiting_approval" widget="boolean_toggle"/>
+                                    <field name="only_late" widget="boolean_toggle"/>
+                                    <field name="only_unfinished" widget="boolean_toggle"/>
+                                </group>
+                                <group string="Receiving &amp; Billing">
+                                    <field name="only_unreceived" widget="boolean_toggle"/>
+                                    <field name="only_unbilled" widget="boolean_toggle"/>
+                                    <field name="only_price_increased" widget="boolean_toggle"/>
+                                    <field name="only_cancelled" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                        </page>
+
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button name="action_generate_report"
+                            string="Generate Report"
+                            type="object"
+                            class="btn-primary"
+                            data-hotkey="q"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Report Wizard — Window Action
+         ================================================================ -->
+    <record id="action_purchase_analytics_report_wizard" model="ir.actions.act_window">
+        <field name="name">Purchase Analytics Report</field>
+        <field name="res_model">purchase.analytics.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_purchase_analytics_report_wizard_form"/>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+
+</odoo>

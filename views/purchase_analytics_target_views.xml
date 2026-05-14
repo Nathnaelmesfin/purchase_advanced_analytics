@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         Purchase Analytics Target — Form View
+         ================================================================ -->
+    <record id="view_purchase_analytics_target_form" model="ir.ui.view">
+        <field name="name">purchase.analytics.target.form</field>
+        <field name="model">purchase.analytics.target</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Analytics Target">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Q1 2025 Procurement Target"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Period">
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group string="General">
+                            <field name="currency_id"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <separator string="Scope"/>
+                    <group>
+                        <group string="Participants">
+                            <field name="vendor_id"/>
+                            <field name="buyer_id"/>
+                            <field name="department"/>
+                            <field name="branch_label"/>
+                        </group>
+                        <group string="Products">
+                            <field name="product_id"/>
+                            <field name="product_category_id"/>
+                        </group>
+                    </group>
+                    <separator string="Targets &amp; Limits"/>
+                    <group>
+                        <group string="Amount Targets">
+                            <field name="target_amount"/>
+                            <field name="maximum_amount"/>
+                        </group>
+                        <group string="Quantity Target">
+                            <field name="target_quantity"/>
+                        </group>
+                    </group>
+                    <separator string="Notes"/>
+                    <field name="notes" placeholder="Additional notes or context for this target…"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Target — List View
+         ================================================================ -->
+    <record id="view_purchase_analytics_target_list" model="ir.ui.view">
+        <field name="name">purchase.analytics.target.list</field>
+        <field name="model">purchase.analytics.target</field>
+        <field name="arch" type="xml">
+            <list string="Purchase Analytics Targets"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="vendor_id"/>
+                <field name="product_id"/>
+                <field name="product_category_id"/>
+                <field name="buyer_id"/>
+                <field name="department"/>
+                <field name="branch_label"/>
+                <field name="target_amount" sum="Total Target Amount"/>
+                <field name="maximum_amount" sum="Total Budget Limit"/>
+                <field name="target_quantity" sum="Total Target Qty"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Target — Search View
+         ================================================================ -->
+    <record id="view_purchase_analytics_target_search" model="ir.ui.view">
+        <field name="name">purchase.analytics.target.search</field>
+        <field name="model">purchase.analytics.target</field>
+        <field name="arch" type="xml">
+            <search string="Search Targets">
+                <field name="name" string="Target Name"/>
+                <field name="vendor_id"/>
+                <field name="buyer_id"/>
+                <field name="product_id"/>
+                <field name="product_category_id"/>
+                <field name="department"/>
+                <field name="branch_label"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="filter_current_month" string="Current Month"
+                        domain="[
+                            ('date_start', '&lt;=', (context_today()).strftime('%Y-%m-%d')),
+                            ('date_end',   '&gt;=', (context_today()).strftime('%Y-%m-%d'))
+                        ]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_vendor" string="Vendor"
+                            context="{'group_by': 'vendor_id'}"/>
+                    <filter name="group_by_buyer" string="Buyer"
+                            context="{'group_by': 'buyer_id'}"/>
+                    <filter name="group_by_product" string="Product"
+                            context="{'group_by': 'product_id'}"/>
+                    <filter name="group_by_category" string="Product Category"
+                            context="{'group_by': 'product_category_id'}"/>
+                    <filter name="group_by_department" string="Department"
+                            context="{'group_by': 'department'}"/>
+                    <filter name="group_by_branch" string="Branch"
+                            context="{'group_by': 'branch_label'}"/>
+                    <filter name="group_by_company" string="Company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                    <filter name="group_by_date_start" string="Start Date"
+                            context="{'group_by': 'date_start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Purchase Analytics Target — Window Action
+         ================================================================ -->
+    <record id="action_purchase_analytics_target" model="ir.actions.act_window">
+        <field name="name">Purchase Analytics Targets</field>
+        <field name="res_model">purchase.analytics.target</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_purchase_analytics_target_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Purchase Analytics Target
+            </p>
+            <p>
+                Set procurement targets by vendor, product, category, buyer, department,
+                or branch for a specific date range and track performance against them.
+            </p>
+        </field>
+    </record>
+
+</odoo>
